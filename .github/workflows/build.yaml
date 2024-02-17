@@ -1,0 +1,64 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build:linux
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: uploads
+          path: "dist/NextMiconIDE-0.0.0.AppImage"
+
+  build-win:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build:win
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: uploads
+          path: "dist/NextMiconIDE Setup 0.0.0.exe"
+
+  release:
+    runs-on: ubuntu-22.04
+    needs: [build-win, build-linux]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: uploads
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            NextMiconIDE-0.0.0.AppImage
+            NextMiconIDE Setup 0.0.0.exe
