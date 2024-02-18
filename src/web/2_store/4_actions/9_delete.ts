@@ -1,30 +1,13 @@
 import { useRecoilState, useRecoilValue, useResetRecoilState } from "recoil";
 import { Project } from "~/files";
-import {
-  InstanceKey,
-  IoportKey,
-  WaypointKey,
-  WireKey,
-  getInstanceKey,
-  getIoportKey,
-  getWireKey,
-  instanceKeyEq,
-  ioportKeyEq,
-  wireKeyEq,
-} from "~/web/1_type";
+import { ObjKey, WaypointKey, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
 import { projectState } from "../2_project/0_project";
 import { useRevert } from "../2_project/2_revert";
 import { selectIsEmpty, selectedObjectsState } from "./0_select";
 
-const deleteInstance = (project: Project, key: InstanceKey): Project => ({
+const deleteObj = (project: Project, key: ObjKey): Project => ({
   ...project,
-  instances: project.instances.filter((instance) => !instanceKeyEq(getInstanceKey(instance), key)),
-  wires: project.wires.filter((wire) => wire.first[0] !== key && wire.last[0] !== key),
-});
-
-const deleteIoport = (project: Project, key: IoportKey): Project => ({
-  ...project,
-  ioports: project.ioports.filter((ioport) => !ioportKeyEq(getIoportKey(ioport), key)),
+  objs: project.objs.filter((obj) => !objKeyEq(getObjKey(obj), key)),
   wires: project.wires.filter((wire) => wire.first[0] !== key && wire.last[0] !== key),
 });
 
@@ -51,10 +34,9 @@ export const useDelete = () => {
     if (!selectIsEmpty(selectedObjects)) {
       console.log("Delete", selectedObjects);
       let ret = project;
-      ret = selectedObjects.instances.reduce(deleteInstance, ret);
-      ret = selectedObjects.ioports.reduce(deleteIoport, ret);
+      ret = selectedObjects.objs.reduce(deleteObj, ret);
       ret = selectedObjects.wires.reduce(deleteWire, ret);
-      ret = [...selectedObjects.waypoints].sort((lhs, rhs) => rhs.index - lhs.index).reduce(deleteWaypoint, ret); // Adhoc implementation
+      ret = [...selectedObjects.waypoints].sort((lhs, rhs) => rhs.index - lhs.index).reduce(deleteWaypoint, ret); // TODO: this is adhoc impl
       setProject(ret);
       resetSelect();
       commit();

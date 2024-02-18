@@ -1,21 +1,12 @@
 import { MouseEvent } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { posRound, posSub } from "~/utils";
-import {
-  hwEditorFSM,
-  mousePositionState,
-  useCreateInstance,
-  useCreateIoport,
-  useCreateWaypoint,
-  useMove,
-  useRangeSelect,
-} from "~/web/2_store";
+import { hwEditorFSM, mousePositionState, useCreateObj, useCreateWaypoint, useMove, useRangeSelect } from "~/web/2_store";
 
 export const useCanvasForeground = () => {
   const mousePosition = useRecoilValue(mousePositionState);
   const [fsm, setState] = useRecoilState(hwEditorFSM);
-  const createInstance = useCreateInstance();
-  const createIoport = useCreateIoport();
+  const createObj = useCreateObj();
   const createWaypoint = useCreateWaypoint();
   const rangeSlect = useRangeSelect();
   const move = useMove();
@@ -38,11 +29,27 @@ export const useCanvasForeground = () => {
     },
     onClick: (e: MouseEvent) => {
       if (fsm.state === "AddInst") {
-        createInstance({ name: fsm.value.name, pack: fsm.value.mod, params: [], pos: posRound(mousePosition) });
+        createObj({
+          node: "Inst",
+          name: fsm.value.name,
+          mod_path: [fsm.value.mod.owner, fsm.value.mod.name, fsm.value.mod.version],
+          params: [],
+          pos: posRound(mousePosition),
+          flip: false,
+          width: 100, // TODO
+        });
         setState({ state: "Default", value: {} });
       }
       if (fsm.state === "AddPrim") {
-        createIoport({ type: fsm.value.type, name: fsm.value.name, params: [], pos: posRound(mousePosition) });
+        // TODO
+        createObj({
+          node: "Io",
+          direct: "In",
+          name: fsm.value.name,
+          pos: posRound(mousePosition),
+          flip: false,
+          width: 100,
+        });
         setState({ state: "Default", value: {} });
       }
       if (fsm.state === "Wireing") {

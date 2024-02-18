@@ -30,9 +30,10 @@ export const useOpenProject = () => {
       // ----------------------------------------------------------------------
       window.log.info("openProject: Load Project");
       const proj = await window.ipc.fs.read([...path, PROJ_FILE]).then((str) => load(str) as Project);
+      console.log(proj);
       // ----------------------------------------------------------------------
       window.log.info("openProject: Load Board");
-      const boardPath = [...appHome, BOARD_DIR, proj.board.owner, proj.board.name, proj.board.version];
+      const boardPath = [...appHome, BOARD_DIR, ...proj.target];
       const board = await window.ipc.fs.read([...boardPath, BOARD_FILE]).then((str) => load(str) as Board);
       // ----------------------------------------------------------------------
       setProjectPath(path);
@@ -54,16 +55,8 @@ export const useSaveProject = () => {
   const project = useRecoilValue(projectState);
   return () => {
     const selected: Project = {
-      board: project.board,
-      instances: project.instances.map(({ name, pack, params, pos, addr, flip }) => ({
-        name,
-        pack: { owner: pack.owner, name: pack.name, version: pack.version },
-        params,
-        pos,
-        addr,
-        flip,
-      })),
-      ioports: project.ioports.map(({ name, type, params, pos, assign, flip }) => ({ name, type, params, pos, assign, flip })),
+      target: project.target,
+      objs: project.objs,
       wires: project.wires.map(({ first, last, waypoints, width }) => ({ first, last, waypoints, width })),
     };
     const str = dump(selected, { indent: 2, noRefs: true, flowLevel: 2 });

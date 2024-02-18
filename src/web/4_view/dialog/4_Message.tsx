@@ -1,4 +1,4 @@
-import { Check, KeyboardArrowDown, KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
+import { Check, KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material";
 import { FC, useState } from "react";
 import { Message, useColor, useMessage } from "~/web/2_store";
 import { Center, IconButton, css } from "../atom";

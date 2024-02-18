@@ -4,7 +4,7 @@ import { Wire, eqPortKey, getWaypointKey, getWireKey, wireKeyEq } from "~/web/1_
 import { projectState } from "../2_project/0_project";
 import { selectedObjectsState, waypointIsSelected } from "../4_actions/0_select";
 import { hwEditorFSM, mousePositionState } from "../4_editor/0_fsm";
-import { portsState } from "./3_port";
+import { portsState } from "./2_port";
 
 export const wiresResolvedState = selector<Wire[]>({
   key: "wiresResolved",
@@ -42,11 +42,7 @@ export const wiresResolvedState = selector<Wire[]>({
       // Resolve waypoint if adding
       if (fsm.state === "AddWaypoint") {
         if (wireKeyEq(getWireKey(wire), fsm.value.wire)) {
-          waypoints = [
-            ...wire.waypoints.slice(0, fsm.value.idx),
-            posRound(mousePosition),
-            ...wire.waypoints.slice(fsm.value.idx),
-          ];
+          waypoints = [...wire.waypoints.slice(0, fsm.value.idx), posRound(mousePosition), ...wire.waypoints.slice(fsm.value.idx)];
         }
       }
 

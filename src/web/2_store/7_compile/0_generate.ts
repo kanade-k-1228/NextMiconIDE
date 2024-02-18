@@ -1,8 +1,7 @@
 import { useRecoilValue } from "recoil";
 import { boardPathState, boardState, projectPathState, projectState } from "../2_project/0_project";
-import { instancesResolvedState } from "../3_selector/1_instance";
-import { ioportsResolvedState } from "../3_selector/2_ioport";
-import { wiresResolvedState } from "../3_selector/4_wire";
+import { objResolvedState } from "../3_selector/1_obj";
+import { wiresResolvedState } from "../3_selector/3_wire";
 import { genReplace } from "./1_miconGen";
 
 export const useGenerate = () => {
@@ -10,8 +9,7 @@ export const useGenerate = () => {
   const project = useRecoilValue(projectState);
   const boardPath = useRecoilValue(boardPathState);
   const board = useRecoilValue(boardState);
-  const instances = useRecoilValue(instancesResolvedState);
-  const ioports = useRecoilValue(ioportsResolvedState);
+  const instances = useRecoilValue(objResolvedState);
   const wires = useRecoilValue(wiresResolvedState);
   return async () => {
     console.log("Generating...");

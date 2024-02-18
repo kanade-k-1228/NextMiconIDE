@@ -1,18 +1,7 @@
-import {
-  AccessTime,
-  Code,
-  DataArray,
-  DataObject,
-  KeyboardArrowLeft,
-  KeyboardArrowRight,
-  Numbers,
-  Percent,
-  PriorityHigh,
-  SvgIconComponent,
-} from "@mui/icons-material";
+import { Code, KeyboardArrowLeft, KeyboardArrowRight, PriorityHigh, SvgIconComponent } from "@mui/icons-material";
 import { FC, useState } from "react";
 import { useRecoilState } from "recoil";
-import { hwEditorFSM, useAvailableIoports, useColor } from "~/web/2_store";
+import { hwEditorFSM, useColor } from "~/web/2_store";
 import { Center, css } from "~/web/4_view/atom";
 
 const primitives = [
@@ -44,7 +33,7 @@ const PrimItem: FC<{ type: string; nameSel: "select" | "input" | "none"; Icon: S
   // Global State
   const color = useColor().editor.hw.pane.item;
   const [fsm, setState] = useRecoilState(hwEditorFSM);
-  const getAvailableIOPorts = useAvailableIoports();
+  // const getAvailableIOPorts = useAvailableIoports();
 
   // Local State
   const [hover, setHover] = useState(false);
@@ -52,7 +41,7 @@ const PrimItem: FC<{ type: string; nameSel: "select" | "input" | "none"; Icon: S
   const [name, setName] = useState(NULL_NAME);
 
   // Calculate
-  const available = getAvailableIOPorts(type);
+  // const available = getAvailableIOPorts(type);
   const selected = fsm.state === "AddPrim" && fsm.value.type === type;
   const _color = selected ? color.sel : hover ? color.hov : color._;
 
@@ -83,9 +72,9 @@ const PrimItem: FC<{ type: string; nameSel: "select" | "input" | "none"; Icon: S
             value={name}
           >
             <option>{NULL_NAME}</option>
-            {available.map((s) => (
+            {/* {available.map((s) => (
               <option key={s}>{s}</option>
-            ))}
+            ))} */}
           </select>
         )}
         {nameSel === "input" && <input style={{ height: "100%", width: "100%", boxSizing: "inherit" }} />}

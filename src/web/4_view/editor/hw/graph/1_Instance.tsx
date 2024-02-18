@@ -1,23 +1,24 @@
 import { FC, useState } from "react";
+import { Inst } from "~/files";
 import { Position, posAdd, posFlip } from "~/utils";
-import { Instance, Pack } from "~/web/1_type";
-import { useColor } from "~/web/2_store";
-import { useInstance } from "~/web/3_facade";
+import { Pack } from "~/web/1_type";
+import { ObjResolveExt, useColor } from "~/web/2_store";
+import { useInst } from "~/web/3_facade";
 import { LeftIcon, RightIcon } from "~/web/4_view/atom";
 
-export const InstanceView: FC<{ instance: Instance }> = ({ instance }) => {
+export const InstView: FC<{ inst: Inst<ObjResolveExt> }> = ({ inst }) => {
   // Global State
-  const { onClick, onMouseDown, key, selected } = useInstance(instance);
+  const { onClick, onMouseDown, key, selected } = useInst(inst);
   const color = useColor().editor.hw.graph.obj;
 
   // Local State
   const [hover, setHover] = useState(false);
 
   // Calculate
-  const [width, height] = instance.pack.size;
-  const [ox, oy] = instance.pos;
-  const ports = instance.pack.ports;
-  const tx = instance.pack.textX;
+  const [width, height] = inst.pack.size;
+  const [ox, oy] = inst.pos;
+  const ports = inst.pack.ports;
+  const tx = inst.pack.textX;
   const highlight = selected ? selected : hover;
 
   return (
@@ -38,11 +39,11 @@ export const InstanceView: FC<{ instance: Instance }> = ({ instance }) => {
         rx={20}
         fill={highlight ? color.hov.fill : color._.fill}
       />
-      <text x={instance.flip ? ox - tx : ox + tx} y={oy} fontSize={25} textAnchor="middle" alignmentBaseline="middle">
-        {instance.name}
+      <text x={inst.flip ? ox - tx : ox + tx} y={oy} fontSize={25} textAnchor="middle" alignmentBaseline="middle">
+        {inst.name}
       </text>
       {ports.map((port) => (
-        <PortInfo key={port.name} port={port} origin={instance.pos} hover={highlight} flip={instance.flip ?? false} />
+        <PortInfo key={port.name} port={port} origin={inst.pos} hover={highlight} flip={inst.flip ?? false} />
       ))}
     </g>
   );

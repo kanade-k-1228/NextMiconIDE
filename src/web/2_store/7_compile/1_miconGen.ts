@@ -1,22 +1,23 @@
-import { Project } from "~/files";
-import { Instance, Primitive, Wire, eqPortKey, wireName } from "~/web/1_type";
+import { Obj, Project } from "~/files";
+import { Wire, eqPortKey, wireName } from "~/web/1_type";
 import { cpp } from "./3_cppGen";
 import { VInstance, VWire, verilog } from "./2_verilogGen";
+import { ObjResolveExt } from "../3_selector/1_obj";
 
 // ------------------------------------------------------------------------------------------------
 // 置換リスト
 
-export const genReplace = (project: Project, instances: Instance[], ioports: Primitive[], wires: Wire[]): Record<string, string> => {
+export const genReplace = (objs: Obj<ObjResolveExt>[], wires: Wire[]): Record<string, string> => {
   return {
-    includes: genIncludes(instances),
-    declarations: genDeclarations(instances),
-    definitions: genDefinitions(instances),
-    iopin: genIOPort(ioports),
-    iobuffer: genIOBuffer(ioports, wires),
-    irq: genIRQ(ioports, wires),
-    instances: genInstances(instances, wires),
-    mem_ready: genMemReady(instances),
-    mem_rdata: genMemRdata(instances),
+    includes: genIncludes(objs),
+    declarations: genDeclarations(objs),
+    definitions: genDefinitions(objs),
+    iopin: genIOPort(objs),
+    iobuffer: genIOBuffer(objs, wires),
+    irq: genIRQ(objs, wires),
+    instances: genInstances(objs, wires),
+    mem_ready: genMemReady(objs),
+    mem_rdata: genMemRdata(objs),
   };
 };
 
@@ -25,19 +26,19 @@ export const genReplace = (project: Project, instances: Instance[], ioports: Pri
 
 // TODO 依存関係解決と重複除去
 
-const genIncludes = (instances: Instance[]) => {
+const genIncludes = (instances: Obj[]) => {
   const includes = instances
     .filter(({ addr }) => addr)
     .map(({ pack }) => cpp.include(`${pack.owner}/${pack.name}/${pack.version}/${pack.name}.hpp`));
   return includes.join("\n");
 };
 
-const genDeclarations = (instances: Instance[]) => {
+const genDeclarations = (instances: Obj[]) => {
   const declarations = instances.filter(({ addr }) => addr).map(({ name, pack }) => cpp.declaration(pack.name, name));
   return declarations.join("\n");
 };
 
-const genDefinitions = (instances: Instance[]) => {
+const genDefinitions = (instances: Obj[]) => {
   const instantiations = instances
     .filter(({ addr }) => addr)
     .map(({ name, pack, addr }) => cpp.instantiation(pack.name, name, `(volatile uint32_t*)0x${addr}00'0000`));
@@ -47,10 +48,10 @@ const genDefinitions = (instances: Instance[]) => {
 // ------------------------------------------------------------------------------------------------
 // ハードウェア
 
-const genIOPort = (ioports: Primitive[]) => {
-  return ioports
-    .flatMap(({ name, pack }) => {
-      switch (pack.type) {
+const genIOPort = (objs: Obj<ObjResolveExt>[]) => {
+  return objs
+    .flatMap((obj) => {
+      switch (obj.node) {
         case "in":
           return [`    input  ${name}`];
         case "out":
@@ -64,8 +65,8 @@ const genIOPort = (ioports: Primitive[]) => {
     .join(",\n");
 };
 
-const genIOBuffer = (ioports: Primitive[], wires: Wire[]) => {
-  return ioports
+const genIOBuffer = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
+  return objs
     .flatMap(({ name, pack }) => {
       if (pack.type === "inout") {
         // IOSEL に接続されているワイヤを探す
@@ -132,8 +133,8 @@ const genIOBuffer = (ioports: Primitive[], wires: Wire[]) => {
     .join("\n");
 };
 
-const genIRQ = (ioports: Primitive[], wires: Wire[]) => {
-  return ioports
+const genIRQ = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
+  return objs
     .flatMap(({ pack, name }) => {
       if (pack.type === "irq") {
         const irqWire = wires.find((wire) => eqPortKey(wire.last, [name, "irq"]));
@@ -148,7 +149,7 @@ const genIRQ = (ioports: Primitive[], wires: Wire[]) => {
     .join("\n");
 };
 
-const genInstances = (instances: Instance[], wires: Wire[]) => {
+const genInstances = (instances: Obj[], wires: Wire[]) => {
   return instances
     .map(({ name, addr, pack, params }) => {
       let vwires: VWire[] = [];
@@ -160,7 +161,7 @@ const genInstances = (instances: Instance[], wires: Wire[]) => {
           { port: "clk", wire: "clk" },
           { port: "resetn", wire: "resetn" },
         ],
-        params: params.map(([k, v]) => ({ param: k, val: `${v}` })),
+        params: [], // TODO
       };
 
       // Memory Map Connections
@@ -184,52 +185,52 @@ const genInstances = (instances: Instance[], wires: Wire[]) => {
       }
 
       // IO Connections
-      pack.ports.forEach((port) => {
-        if (port.direct === "input") {
-          const wire = wires.find(({ last: to }) => eqPortKey(to, [name, port.name]));
-          if (wire) {
-            vinst.ioport = [...vinst.ioport, { port: port.name, wire: wireName(wire.first) }];
-            return;
-          }
-          if (!wire) {
-            console.log(`Open port: ${name}.${port.name}`);
-            vinst.ioport = [...vinst.ioport, { port: port.name, wire: verilog.const({ width: port.width, value: 0 }) }];
-            return;
-          }
-        }
+      // pack.ports.forEach((port) => {
+      //   if (port.direct === "input") {
+      //     const wire = wires.find(({ last: to }) => eqPortKey(to, [name, port.name]));
+      //     if (wire) {
+      //       vinst.ioport = [...vinst.ioport, { port: port.name, wire: wireName(wire.first) }];
+      //       return;
+      //     }
+      //     if (!wire) {
+      //       console.log(`Open port: ${name}.${port.name}`);
+      //       vinst.ioport = [...vinst.ioport, { port: port.name, wire: verilog.const({ width: port.width, value: 0 }) }];
+      //       return;
+      //     }
+      //   }
 
-        if (port.direct === "output") {
-          const wire = wires.find(({ first: from }) => eqPortKey(from, [name, port.name]));
-          if (wire) {
-            const typeCheck = wire.width == port.width;
-            if (typeCheck) {
-              vwires = [...vwires, { name: wireName([name, port.name]), width: port.width }];
-              vinst.ioport = [...vinst.ioport, { port: port.name, wire: wireName([name, port.name]) }];
-              return;
-            } else {
-              console.log(`Invalid width: ${name}.${port.name}`);
-              return;
-            }
-          }
-          if (!wire) {
-            console.log(`Open port: ${name}.${port.name}`);
-            return;
-          }
-        }
-      });
+      //   if (port.direct === "output") {
+      //     const wire = wires.find(({ first: from }) => eqPortKey(from, [name, port.name]));
+      //     if (wire) {
+      //       const typeCheck = wire.width == port.width;
+      //       if (typeCheck) {
+      //         vwires = [...vwires, { name: wireName([name, port.name]), width: port.width }];
+      //         vinst.ioport = [...vinst.ioport, { port: port.name, wire: wireName([name, port.name]) }];
+      //         return;
+      //       } else {
+      //         console.log(`Invalid width: ${name}.${port.name}`);
+      //         return;
+      //       }
+      //     }
+      //     if (!wire) {
+      //       console.log(`Open port: ${name}.${port.name}`);
+      //       return;
+      //     }
+      //   }
+      // });
 
       return [verilog.instance(vinst), ...vwires.map(verilog.wire)].join("\n");
     })
     .join("\n\n");
 };
 
-const genMemReady = (instances: Instance[]) =>
+const genMemReady = (instances: Obj[]) =>
   instances
     .filter(({ pack }) => pack.software)
     .map(({ name }) => `, ${name}_ready`)
     .join("");
 
-const genMemRdata = (instances: Instance[]) =>
+const genMemRdata = (instances: Obj[]) =>
   instances
     .filter(({ pack }) => pack.software)
     .map(({ name }) => `: ${name}_ready ? ${name}_rdata`)

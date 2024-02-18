@@ -1,8 +1,8 @@
-import { ArrowDownward, Check, QuestionMark } from "@mui/icons-material";
+import { QuestionMark } from "@mui/icons-material";
 import { CSSProperties, FC, useState } from "react";
 import { useRecoilState, useRecoilValueLoadable } from "recoil";
 import { PackKey, packEq, packToString } from "~/web/1_type";
-import { hwEditorFSM, localPacksState, useColor, useGetNewInstanceName } from "~/web/2_store";
+import { hwEditorFSM, localPacksState, useColor, useGetNewObjName } from "~/web/2_store";
 import { IconButton, SearchBox, css } from "~/web/4_view/atom";
 
 export const ModPane: FC<{ style?: CSSProperties }> = ({ style }) => {
@@ -46,7 +46,7 @@ const ModItem: FC<{ pack: PackKey }> = ({ pack }) => {
   // Global State
   const color = useColor().editor.hw.pane.item;
   const [fsm, setState] = useRecoilState(hwEditorFSM);
-  const getNewName = useGetNewInstanceName();
+  const getNewName = useGetNewObjName();
 
   // Local State
   const [hover, setHover] = useState(false);

@@ -6,31 +6,31 @@ import { PackKey, packEq, packToString } from "~/web/1_type";
 import {
   boardState,
   hwEditorFSM,
-  instancesResolvedState,
-  ioportsResolvedState,
   localPacksState,
   mousePositionState,
+  objResolvedState,
   portsState,
   useColor,
   wiresResolvedState,
 } from "~/web/2_store";
 import { Canvas } from "./0_Canvas";
-import { InstanceView, PackView } from "./1_Instance";
-import { IoifView, PrimitiveComponent } from "./2_Primitive";
+import { InstView, PackView } from "./1_Instance";
+import { IoifView } from "./2_Primitive";
 import { PortComponent } from "./3_Port";
 import { WireComponent } from "./4_Wire";
 
 export const MiconEditor: FC<{}> = () => {
-  const instances = useRecoilValue(instancesResolvedState);
-  const ioPorts = useRecoilValue(ioportsResolvedState);
+  const objs = useRecoilValue(objResolvedState);
   const ports = useRecoilValue(portsState);
   const wires = useRecoilValue(wiresResolvedState);
   const fsm = useRecoilValue(hwEditorFSM);
   return (
     <Canvas>
       {fsm.state === "Selecting" && <SelectRect start={fsm.value.start} />}
-      {ioPorts?.map((ioport) => <PrimitiveComponent key={ioport.name} prim={ioport} />)}
-      {instances?.map((instance) => <InstanceView key={instance.name} instance={instance} />)}
+      {objs.map((obj) => {
+        if (obj.node === "Inst") return <InstView key={obj.name} inst={obj} />;
+        else return <></>;
+      })}
       {fsm.state === "Wireing" && <ConnectingWire path={[fsm.value.startPos, ...fsm.value.path]} />}
       {wires?.map((wire, i) => <WireComponent key={i} wire={wire} />)}
       {ports?.map((port) => <PortComponent key={port.key} port={port} />)}

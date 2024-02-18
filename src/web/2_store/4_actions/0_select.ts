@@ -1,83 +1,37 @@
 import { atom, selector, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { Position } from "~/utils";
 import { Rect, corrision, corrisionRectPoint, diagonalRect } from "~/web/0_common";
-import {
-  Instance,
-  InstanceKey,
-  Primitive,
-  IoportKey,
-  WaypointKey,
-  Wire,
-  WireKey,
-  getWaypointKey,
-  instanceKeyEq,
-  ioportKeyEq,
-  waypointKeyEq,
-  wireKeyEq,
-} from "~/web/1_type";
-import { instancesResolvedState } from "../3_selector/1_instance";
-import { ioportsResolvedState } from "../3_selector/2_ioport";
-import { wiresResolvedState } from "../3_selector/4_wire";
+import { ObjKey, WaypointKey, Wire, WireKey, getWaypointKey, objKeyEq, waypointKeyEq, wireKeyEq } from "~/web/1_type";
+import { ObjResolveExt, objResolvedState } from "../3_selector/1_obj";
+import { wiresResolvedState } from "../3_selector/3_wire";
 import { hwEditorFSM, mousePositionState } from "../4_editor/0_fsm";
+import { Obj } from "~/files";
 
 export interface SelectedObjects {
-  instances: InstanceKey[];
-  ioports: IoportKey[];
+  objs: ObjKey[];
   wires: WireKey[];
   waypoints: WaypointKey[];
 }
 
 export const selectIsEmpty = (selectedObjects: SelectedObjects): boolean =>
-  selectedObjects.instances.length === 0 &&
-  selectedObjects.ioports.length === 0 &&
-  selectedObjects.wires.length === 0 &&
-  selectedObjects.waypoints.length === 0;
+  selectedObjects.objs.length === 0 && selectedObjects.wires.length === 0 && selectedObjects.waypoints.length === 0;
 
 export const selectedObjectsState = atom<SelectedObjects>({
   key: "selectedObjects",
-  default: { instances: [], ioports: [], wires: [], waypoints: [] },
+  default: { objs: [], wires: [], waypoints: [] },
 });
 
 // --------------------------------------------------------------------------------
 // Select
 // オブジェクトを選択する
 
-const selectInstance = (key: InstanceKey): SelectedObjects => ({
-  instances: [key],
-  ioports: [],
-  wires: [],
-  waypoints: [],
-});
+const selectInstance = (key: ObjKey): SelectedObjects => ({ objs: [key], wires: [], waypoints: [] });
+const selectWire = (key: WireKey): SelectedObjects => ({ objs: [], wires: [key], waypoints: [] });
+const selectWaypoint = (key: WaypointKey): SelectedObjects => ({ objs: [], wires: [], waypoints: [key] });
 
-const selectIoport = (key: IoportKey): SelectedObjects => ({
-  instances: [],
-  ioports: [key],
-  wires: [],
-  waypoints: [],
-});
-
-const selectWire = (key: WireKey): SelectedObjects => ({
-  instances: [],
-  ioports: [],
-  wires: [key],
-  waypoints: [],
-});
-
-const selectWaypoint = (key: WaypointKey): SelectedObjects => ({
-  instances: [],
-  ioports: [],
-  wires: [],
-  waypoints: [key],
-});
-
-export const useSelectInstance = () => {
+export const useSelectObject = () => {
   const setSelectedObjects = useSetRecoilState(selectedObjectsState);
-  return (key: InstanceKey) => setSelectedObjects(selectInstance(key));
-};
-
-export const useSelectIoport = () => {
-  const setSelectedObjects = useSetRecoilState(selectedObjectsState);
-  return (key: IoportKey) => setSelectedObjects(selectIoport(key));
+  return (key: ObjKey) => setSelectedObjects(selectInstance(key));
 };
 
 export const useSelectWire = () => {
@@ -94,17 +48,13 @@ export const useSelectWaypoint = () => {
 // RangeSelect
 // 範囲選択で選択されたオブジェクトを列挙する
 
-const instanceRangeSelect = (instances: Instance[], rect: Rect): InstanceKey[] => {
-  return instances
-    .filter((instance) =>
-      corrision({ x: instance.pos[0], y: instance.pos[1], width: instance.pack.size[0], height: instance.pack.size[1] }, rect),
-    )
-    .map(({ name }) => name);
-};
-
-const ioportRangeSelect = (ioports: Primitive[], rect: Rect): InstanceKey[] => {
-  return ioports
-    .filter((ioport) => corrision({ x: ioport.pos[0], y: ioport.pos[1], width: ioport.pack.size[0], height: ioport.pack.size[1] }, rect))
+const objRangeSelect = (objs: Obj<ObjResolveExt>[], rect: Rect): ObjKey[] => {
+  return objs
+    .filter((obj) => {
+      if (obj.node === "Inst") {
+        return corrision({ x: obj.pos[0], y: obj.pos[1], width: obj.pack.size[0], height: obj.pack.size[1] }, rect);
+      }
+    })
     .map(({ name }) => name);
 };
 
@@ -115,15 +65,14 @@ const waypointRangeSelect = (wires: Wire[], rect: Rect): WaypointKey[] => {
 };
 
 export const useRangeSelect = () => {
-  const instances = useRecoilValue(instancesResolvedState);
-  const ioports = useRecoilValue(ioportsResolvedState);
+  const objs = useRecoilValue(objResolvedState);
   const wires = useRecoilValue(wiresResolvedState);
   const setSelectedObjects = useSetRecoilState(selectedObjectsState);
+  // TODO: Select Wires
   return (start: Position, end: Position) => {
     const rect = diagonalRect(start[0], start[1], end[0], end[1]);
     setSelectedObjects({
-      instances: instanceRangeSelect(instances, rect),
-      ioports: ioportRangeSelect(ioports, rect),
+      objs: objRangeSelect(objs, rect),
       wires: [],
       waypoints: waypointRangeSelect(wires, rect),
     });
@@ -139,16 +88,14 @@ export const selectedObjectsResolvedState = selector<SelectedObjects>({
   key: "selectedOblectsResolved",
   get: ({ get }) => {
     const fsm = get(hwEditorFSM);
-    const instances = get(instancesResolvedState);
-    const ioports = get(ioportsResolvedState);
+    const objs = get(objResolvedState);
     const wires = get(wiresResolvedState);
     const mouse = get(mousePositionState);
     const selectedObjects = get(selectedObjectsState);
     if (fsm.state === "Selecting") {
       const rect = diagonalRect(fsm.value.start[0], fsm.value.start[1], mouse[0], mouse[1]);
       return {
-        instances: instanceRangeSelect(instances, rect),
-        ioports: ioportRangeSelect(ioports, rect),
+        objs: objRangeSelect(objs, rect),
         wires: [],
         waypoints: waypointRangeSelect(wires, rect),
       };
@@ -160,14 +107,9 @@ export const selectedObjectsResolvedState = selector<SelectedObjects>({
 // AppendSelect
 // 現在の選択に追加する
 
-const appendInstance = (selected: SelectedObjects, add: InstanceKey): SelectedObjects => ({
+const appendObj = (selected: SelectedObjects, add: ObjKey): SelectedObjects => ({
   ...selected,
-  instances: [...selected.instances, add],
-});
-
-const appendIoport = (selected: SelectedObjects, add: IoportKey): SelectedObjects => ({
-  ...selected,
-  ioports: [...selected.ioports, add],
+  objs: [...selected.objs, add],
 });
 
 const appendWire = (selected: SelectedObjects, add: WireKey): SelectedObjects => ({
@@ -182,12 +124,7 @@ const appendWaypoint = (selected: SelectedObjects, add: WaypointKey): SelectedOb
 
 export const useAppendInstance = () => {
   const [selectedObjects, setSelectedObjects] = useRecoilState(selectedObjectsState);
-  return (add: InstanceKey) => setSelectedObjects(appendInstance(selectedObjects, add));
-};
-
-export const useAppendIoport = () => {
-  const [selectedObjects, setSelectedObjects] = useRecoilState(selectedObjectsState);
-  return (add: IoportKey) => setSelectedObjects(appendIoport(selectedObjects, add));
+  return (add: ObjKey) => setSelectedObjects(appendObj(selectedObjects, add));
 };
 
 export const useAppendWire = () => {
@@ -204,11 +141,8 @@ export const useAppendWaypoint = () => {
 // IsSelected
 // オブジェクトが選択されているか判定する
 
-export const instanceIsSelected = (selectedInstances: InstanceKey[], find: InstanceKey) =>
-  selectedInstances.find((inst) => instanceKeyEq(inst, find)) !== undefined;
-
-export const ioportIsSelected = (selectedIoports: IoportKey[], find: IoportKey) =>
-  selectedIoports.find((ioport) => ioportKeyEq(ioport, find)) !== undefined;
+export const instanceIsSelected = (selectedInstances: ObjKey[], find: ObjKey) =>
+  selectedInstances.find((inst) => objKeyEq(inst, find)) !== undefined;
 
 export const wireIsSelected = (selectedWires: WireKey[], find: WireKey) =>
   selectedWires.find((wire) => wireKeyEq(wire, find)) !== undefined;
@@ -216,14 +150,9 @@ export const wireIsSelected = (selectedWires: WireKey[], find: WireKey) =>
 export const waypointIsSelected = (selectedWaypoints: WaypointKey[], find: WaypointKey) =>
   selectedWaypoints.find((waypoint) => waypointKeyEq(waypoint, find)) !== undefined;
 
-export const useIoportIsSelected = (find: IoportKey) => {
+export const useInstanceIsSelected = (find: ObjKey) => {
   const selectedObjects = useRecoilValue(selectedObjectsResolvedState);
-  return ioportIsSelected(selectedObjects.ioports, find);
-};
-
-export const useInstanceIsSelected = (find: InstanceKey) => {
-  const selectedObjects = useRecoilValue(selectedObjectsResolvedState);
-  return instanceIsSelected(selectedObjects.instances, find);
+  return instanceIsSelected(selectedObjects.objs, find);
 };
 
 export const useWireIsSelected = (find: WireKey) => {

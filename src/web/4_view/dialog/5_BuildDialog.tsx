@@ -1,20 +1,9 @@
-import {
-  Close,
-  ReplayRounded,
-  Download,
-  Upload,
-  Check,
-  Construction,
-  AccountTree,
-  BuildCircle,
-  Build,
-  DoubleArrow,
-} from "@mui/icons-material";
+import { DoubleArrow } from "@mui/icons-material";
 import { FC, Fragment } from "react";
-import { useSetRecoilState, useRecoilValueLoadable, useRecoilRefresher_UNSTABLE, useRecoilValue } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { dialogState } from "~/web/2_route";
-import { boardListState, boardState, pathState, useColor, useGenerate, useRunMake } from "~/web/2_store";
-import { Center, Dialog, IconButton, IconText, Left, css } from "../atom";
+import { boardState, useColor, useGenerate, useRunMake } from "~/web/2_store";
+import { Center, Dialog, IconText, Left, css } from "../atom";
 
 // Replace ${ }
 

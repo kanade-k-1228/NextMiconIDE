@@ -1,22 +1,21 @@
 import { FC, useState } from "react";
-import { Board } from "~/files";
+import { Board, Obj } from "~/files";
 import { Position, posAdd, posFlip, posSub } from "~/utils";
-import { Primitive } from "~/web/1_type";
 import { useColor } from "~/web/2_store";
-import { useIoport } from "~/web/3_facade";
+import { usePrim } from "~/web/3_facade";
 import { ExclamationIcon, LeftIcon, QuestionIcon, RightIcon } from "~/web/4_view/atom";
 
-export const PrimitiveComponent: FC<{ prim: Primitive }> = ({ prim: ioport }) => {
+export const PrimitiveComponent: FC<{ obj: Obj }> = ({ obj }) => {
   // Global State
-  const { selected, onClick, onMouseDown } = useIoport(ioport);
+  const { selected, onClick, onMouseDown } = usePrim(obj);
   const color = useColor().editor.hw.graph.obj;
 
   // Local State
   const [hover, setHover] = useState(false);
 
   // Calculate
-  const [width, height] = posSub(ioport.pack.size, [0, 4]);
-  const [ox, oy] = ioport.pos;
+  const [width, height] = posSub(obj.pack.size, [0, 4]);
+  const [ox, oy] = obj.pos;
   const highlight = selected ? selected : hover;
 
   return (
@@ -38,19 +37,19 @@ export const PrimitiveComponent: FC<{ prim: Primitive }> = ({ prim: ioport }) =>
         fill={highlight ? color.hov.fill : color._.fill}
       />
       <text
-        x={ioport.flip ? ox - width / 2 + 40 : ox + width / 2 - 40}
+        x={obj.flip ? ox - width / 2 + 40 : ox + width / 2 - 40}
         y={oy}
         fontSize={22}
-        textAnchor={ioport.flip ? "start" : "end"}
+        textAnchor={obj.flip ? "start" : "end"}
         alignmentBaseline="middle"
       >
-        {ioport.name}
+        {obj.name}
       </text>
-      {ioport.pack.ports.map((port) => (
-        <IOPortBg key={port.name} port={port} flip={ioport.flip ?? false} hover={highlight} origin={ioport.pos} />
+      {obj.pack.ports.map((port) => (
+        <IOPortBg key={port.name} port={port} flip={obj.flip ?? false} hover={highlight} origin={obj.pos} />
       ))}
-      {ioport.pack.ports.map((port) => (
-        <IOPortIcon key={port.name} port={port} flip={ioport.flip ?? false} hover={highlight} origin={ioport.pos} />
+      {obj.pack.ports.map((port) => (
+        <IOPortIcon key={port.name} port={port} flip={obj.flip ?? false} hover={highlight} origin={obj.pos} />
       ))}
     </g>
   );

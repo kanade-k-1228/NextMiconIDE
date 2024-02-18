@@ -1,5 +1,5 @@
 import { selector } from "recoil";
-import { wiresResolvedState } from "./4_wire";
+import { wiresResolvedState } from "./3_wire";
 
 export const waypointsState = selector<{}[]>({
   key: "paths",

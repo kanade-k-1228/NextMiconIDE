@@ -1,13 +1,12 @@
 import { KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material";
 import { CSSProperties, FC, Fragment, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Func } from "~/files";
-import { Instance } from "~/web/1_type";
-import { instancesResolvedState, useColor, useSoftwareEditor } from "~/web/2_store";
+import { Func, Inst } from "~/files";
+import { ObjResolveExt, objResolvedState, useColor, useSoftwareEditor } from "~/web/2_store";
 import { css } from "~/web/4_view/atom";
 
 export const InstanceList = () => {
-  const instances = useRecoilValue(instancesResolvedState);
+  const objs = useRecoilValue(objResolvedState);
   const color = useColor().editor.sw.pane;
   return (
     <div style={{ overflow: "scroll", background: color._.bg }}>
@@ -19,18 +18,18 @@ export const InstanceList = () => {
           userSelect: "none",
         }}
       >
-        {instances
-          .filter(({ pack }) => pack.software)
+        {objs
+          .filter((obj) => obj.node === "Inst" && obj.pack.software)
           .toSorted((lhs, rhs) => (lhs.name > rhs.name ? 1 : -1))
-          .map((instance) => (
-            <InstanceDoc key={instance.name} instance={instance} />
-          ))}
+          .flatMap((obj) => {
+            return obj.node === "Inst" ? [<InstanceDoc key={obj.name} inst={obj} />] : [];
+          })}
       </div>
     </div>
   );
 };
 
-const InstanceDoc: FC<{ instance: Instance }> = ({ instance }) => {
+const InstanceDoc: FC<{ inst: Inst<ObjResolveExt> }> = ({ inst }) => {
   const color = useColor().editor.sw.pane.inst;
 
   const [open, setOpen] = useState(false);
@@ -57,11 +56,11 @@ const InstanceDoc: FC<{ instance: Instance }> = ({ instance }) => {
         onMouseLeave={() => setHover(false)}
       >
         <div style={{ ...css.center }}>{open ? <KeyboardArrowDown style={iconCss} /> : <KeyboardArrowRight style={iconCss} />}</div>
-        <div style={{ ...css.left, fontSize: SIZE - 10 }}>{instance.name}</div>
+        <div style={{ ...css.left, fontSize: SIZE - 10 }}>{inst.name}</div>
       </div>
       {open && (
         <div style={{ display: "flex", flexDirection: "column", rowGap: 10 }}>
-          {instance.pack.software?.methods.map((method, i) => <Func key={i} inst={instance.name} note={method.note} method={method} />)}
+          {inst.pack.software?.methods.map((method, i) => <Func key={i} inst={inst.name} note={method.note} method={method} />)}
         </div>
       )}
     </div>

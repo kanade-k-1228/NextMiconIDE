@@ -1,29 +1,30 @@
 import { MouseEventHandler } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Instance, getInstanceKey } from "~/web/1_type";
+import { Obj } from "~/files";
+import { getObjKey } from "~/web/1_type";
 import {
   hwEditorFSM,
   mousePositionState,
   useAppendInstance,
   useInstanceIsSelected,
   useRenameInstance,
-  useSelectInstance,
+  useSelectObject,
 } from "~/web/2_store";
 
-export const useInstance = (instance: Instance) => {
+export const useInst = (inst: Obj) => {
   // Global State
   const [fsm, setState] = useRecoilState(hwEditorFSM);
   const mousePosition = useRecoilValue(mousePositionState);
-  const selectInstance = useSelectInstance();
+  const selectInstance = useSelectObject();
   const appendInstance = useAppendInstance();
   const renameInstance = useRenameInstance();
 
   // Calculate
-  const key = getInstanceKey(instance);
+  const key = getObjKey(inst);
   const selected = useInstanceIsSelected(key);
   const select = () => selectInstance(key);
   const append = () => appendInstance(key);
-  const rename = (newName: string) => renameInstance(instance.name, newName);
+  const rename = (newName: string) => renameInstance(inst.name, newName);
   const onMouseDown: MouseEventHandler = (e) => {
     if (fsm.state === "Default") {
       if (!selected) select();

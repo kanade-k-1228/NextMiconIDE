@@ -1,34 +1,21 @@
 import { atom, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { Project } from "~/files";
+import { Obj, Wire, Project } from "~/files";
 import { Position, posAdd, posMid, posRound, posSub } from "~/utils";
-import {
-  InstanceKey,
-  IoportKey,
-  PortKey,
-  WireKey,
-  getInstanceKey,
-  getIoportKey,
-  getWireKey,
-  instanceKeyEq,
-  ioportKeyEq,
-  wireKeyEq,
-} from "~/web/1_type";
+import { ObjKey, PortKey, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
 import { boardState, projectState } from "../2_project/0_project";
 import { useRevert } from "../2_project/2_revert";
 import { mousePositionState } from "../4_editor/0_fsm";
 import { selectIsEmpty, selectedObjectsResolvedState } from "./0_select";
-import { TODO_getNewIoportName, createInstance, createWire, getNewInstanceName } from "./1_create";
+import { createObj, createWire, getNewObjName } from "./1_create";
 
 interface Clipboard {
-  instances: Project["instances"];
-  ioports: Project["ioports"];
-  wires: Project["wires"];
+  objs: Obj[];
+  wires: Wire[];
 }
 
-const clipboardEmpty = (clipboard: Clipboard) =>
-  clipboard.instances.length === 0 && clipboard.ioports.length === 0 && clipboard.wires.length === 0;
+const clipboardEmpty = (clipboard: Clipboard) => clipboard.objs.length === 0 && clipboard.wires.length === 0;
 
-const clipboardState = atom<Clipboard>({ key: "hwClipboard", default: { instances: [], ioports: [], wires: [] } });
+const clipboardState = atom<Clipboard>({ key: "hwClipboard", default: { objs: [], wires: [] } });
 
 const getClipboardRange = (clipboard: Clipboard) => {
   return { min: [0, 0] as Position, max: [500, 500] as Position };
@@ -37,14 +24,9 @@ const getClipboardRange = (clipboard: Clipboard) => {
 // --------------------------------------------------------------------------------
 // Copy
 
-const copyInstance = (clipboard: Clipboard, key: InstanceKey, project: Project): Clipboard => {
-  const found = project.instances.find((inst) => instanceKeyEq(getInstanceKey(inst), key));
-  return found ? { ...clipboard, instances: [...clipboard.instances, found] } : clipboard;
-};
-
-const copyIoport = (clipboard: Clipboard, key: IoportKey, project: Project): Clipboard => {
-  const found = project.ioports.find((ioport) => ioportKeyEq(getIoportKey(ioport), key));
-  return found ? { ...clipboard, ioports: [...clipboard.ioports, found] } : clipboard;
+const copyInstance = (clipboard: Clipboard, key: ObjKey, project: Project): Clipboard => {
+  const found = project.objs.find((obj) => objKeyEq(getObjKey(obj), key));
+  return found ? { ...clipboard, objs: [...clipboard.objs, found] } : clipboard;
 };
 
 const copyWire = (clipboard: Clipboard, key: WireKey, project: Project): Clipboard => {
@@ -59,9 +41,8 @@ export const useCopy = () => {
   return () => {
     if (!selectIsEmpty(selectedObjects)) {
       console.log("Copy", selectedObjects);
-      let ret: Clipboard = { instances: [], ioports: [], wires: [] };
-      ret = selectedObjects.instances.reduce((acc, key) => copyInstance(acc, key, project), ret);
-      ret = selectedObjects.ioports.reduce((acc, key) => copyIoport(acc, key, project), ret);
+      let ret: Clipboard = { objs: [], wires: [] };
+      ret = selectedObjects.objs.reduce((acc, key) => copyInstance(acc, key, project), ret);
       ret = selectedObjects.wires.reduce((acc, key) => copyWire(acc, key, project), ret);
       setHwClipboard(ret);
     }
@@ -71,17 +52,12 @@ export const useCopy = () => {
 // --------------------------------------------------------------------------------
 // Paste
 
-const pasteInstance = (project: Project, instance: Project["instances"][number], delta: Position): Project => {
-  return createInstance(project, {
+const pasteObj = (project: Project, instance: Project["objs"][number], delta: Position): Project => {
+  return createObj(project, {
     ...instance,
-    name: getNewInstanceName(project, instance.name),
+    name: getNewObjName(project, instance.name),
     pos: posAdd(instance.pos, delta),
   });
-};
-
-const pasteIoport = (project: Project, ioport: Project["ioports"][number]): Project => {
-  console.log("TODO: Paste Ioport", ioport);
-  return project;
 };
 
 const pasteWire = (project: Project, wire: Project["wires"][number]): Project => {
@@ -105,25 +81,17 @@ export const usePaste = () => {
       const delta = posRound(posSub(mousePosition, mid));
 
       // Generate new objects
-      const newInstances = clipboard.instances.map((instance) => ({
+      const newobjs = clipboard.objs.map((instance) => ({
         ...instance,
-        name: getNewInstanceName(project, instance.name),
+        name: getNewObjName(project, instance.name),
         pos: posAdd(instance.pos, delta),
         oldName: instance.name,
       }));
-      const newIoports = clipboard.ioports.map((ioport) => ({
-        ...ioport,
-        name: TODO_getNewIoportName(project, board, ioport.type),
-        pos: posAdd(ioport.pos, delta),
-        oldName: ioport.name,
-      }));
       const newWires = clipboard.wires.flatMap((wire) => {
-        const fromInstance = newInstances.find(({ oldName }) => oldName === wire.first[0]);
-        const fromIoport = newIoports.find(({ oldName }) => oldName === wire.first[0]);
-        const toInstance = newInstances.find(({ oldName }) => oldName === wire.last[0]);
-        const toIoport = newIoports.find(({ oldName }) => oldName === wire.last[0]);
-        const newFrom = fromInstance?.name ?? fromIoport?.name;
-        const newTo = toInstance?.name ?? toIoport?.name;
+        const fromObj = newobjs.find(({ oldName }) => oldName === wire.first[0]);
+        const toObj = newobjs.find(({ oldName }) => oldName === wire.last[0]);
+        const newFrom = fromObj?.name;
+        const newTo = toObj?.name;
         if (newFrom && newTo) {
           return [
             {
@@ -138,7 +106,7 @@ export const usePaste = () => {
 
       // Clone Objects
       let ret = project;
-      ret = newInstances.reduce((acc, inst) => createInstance(acc, inst), ret);
+      ret = newobjs.reduce((acc, inst) => createObj(acc, inst), ret);
       // ret = newIoports.reduce((acc, key) => createIoport(acc, key), ret);
       ret = newWires.reduce((acc, key) => createWire(acc, key), ret);
       setProject(ret);

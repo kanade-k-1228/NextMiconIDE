@@ -1,13 +1,7 @@
 import { MouseEventHandler } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { WaypointKey } from "../1_type";
-import {
-  hwEditorFSM,
-  mousePositionState,
-  useAppendWaypoint,
-  useSelectWaypoint,
-  useWaypointIsSelected,
-} from "../2_store";
+import { hwEditorFSM, mousePositionState, useAppendWaypoint, useSelectWaypoint, useWaypointIsSelected } from "../2_store";
 
 export const useWaypoint = (key: WaypointKey) => {
   // Global State

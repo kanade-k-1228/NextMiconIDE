@@ -1,81 +1,43 @@
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Board, Project } from "~/files";
+import { Board, Obj, Project } from "~/files";
 import { Position } from "~/utils";
-import { InstanceKey, Port, Wire, WireKey, getInstanceKey, getWireKey, instanceKeyEq, wireKeyEq } from "~/web/1_type";
+import { ObjKey, Port, Wire, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
 import { boardState, projectState } from "../2_project/0_project";
 import { useRevert } from "../2_project/2_revert";
-import { portsState } from "../3_selector/3_port";
-import { useSelectInstance } from "./0_select";
+import { portsState } from "../3_selector/2_port";
+import { useSelectObject } from "./0_select";
 
 // --------------------------------------------------------------------------------
 // Create Instance
 
-export const instanceExists = (project: Project, key: InstanceKey) =>
-  project.instances.find((inst) => instanceKeyEq(getInstanceKey(inst), key)) !== undefined;
+export const objExists = (project: Project, key: ObjKey) => project.objs.find((obj) => objKeyEq(getObjKey(obj), key)) !== undefined;
 
-export const getNewInstanceName = (project: Project, base: string) => {
+export const getNewObjName = (project: Project, base: string) => {
   for (let i = 0; Number.isSafeInteger(i); ++i) {
     const name = `${base}${i}`;
-    if (!instanceExists(project, name)) return name;
+    if (!objExists(project, name)) return name;
   }
   throw `ERROR: Too Many Instance: ${base}`;
 };
 
-export const useGetNewInstanceName = () => {
+export const useGetNewObjName = () => {
   const project = useRecoilValue(projectState);
-  return (base: string) => getNewInstanceName(project, base);
+  return (base: string) => getNewObjName(project, base);
 };
 
-export const createInstance = (project: Project, newInstance: Project["instances"][number]): Project => {
-  if (instanceExists(project, newInstance.name)) throw `Instance name duplicate: ${newInstance.name}`;
-  return { ...project, instances: [...project.instances, newInstance] };
+export const createObj = (project: Project, newObj: Obj): Project => {
+  if (objExists(project, newObj.name)) throw `Object name duplicate: ${newObj.name}`;
+  return { ...project, objs: [...project.objs, newObj] };
 };
 
-export const useCreateInstance = () => {
+export const useCreateObj = () => {
   const { commit } = useRevert();
   const [project, setProject] = useRecoilState(projectState);
-  const selectInstance = useSelectInstance();
-  return (newInstance: Project["instances"][number]) => {
-    setProject(createInstance(project, newInstance));
+  const selectInstance = useSelectObject();
+  return (newObj: Obj) => {
+    setProject(createObj(project, newObj));
     commit();
-    selectInstance(newInstance.name);
-  };
-};
-
-// --------------------------------------------------------------------------------
-// Create Ioport
-
-const getAvailableIoports = (project: Project, board: Board, type: string) => {};
-
-export const TODO_getNewIoportName = (project: Project, board: Board, type: string) => {
-  return "";
-};
-
-export const useAvailableIoports = () => {
-  const board = useRecoilValue(boardState);
-  const { ioports } = useRecoilValue(projectState);
-  const usedList = ioports.map(({ name }) => name);
-  return (type: string) => {
-    const list = Object.entries(board.ioports)
-      .filter(([_, types]) => types.includes(type))
-      .map(([name, _]) => name)
-      .filter((name) => !usedList.includes(name));
-    return list;
-  };
-};
-
-export const useCreateIoport = () => {
-  const { commit } = useRevert();
-  const [project, setProject] = useRecoilState(projectState);
-  const getAvailableIoports = useAvailableIoports();
-  return (newIoport: { name?: string; type: string; params: [string, string | number][]; pos: [number, number] }) => {
-    const getNewName = () => {
-      getAvailableIoports(newIoport.type);
-      throw `ERROR: Too Many IOPorts`;
-    };
-    const name = newIoport.name ?? getNewName();
-    setProject({ ...project, ioports: [...project.ioports, { ...newIoport, name }] });
-    commit();
+    selectInstance(newObj.name);
   };
 };
 
