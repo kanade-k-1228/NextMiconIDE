@@ -1,5 +1,5 @@
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Board, Obj, Project } from "~/files";
+import { Target, Obj, Project } from "~/files";
 import { Position } from "~/utils";
 import { ObjKey, Port, Wire, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
 import { boardState, projectState } from "../2_project/0_project";

@@ -1,4 +1,4 @@
-export interface Board {
+export interface Target {
   templates: string[][];
 
   addr: {

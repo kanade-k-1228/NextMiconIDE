@@ -1,7 +1,7 @@
 import { load } from "js-yaml";
 import { selector, useRecoilValue } from "recoil";
 import { BOARD_DIR, BOARD_FILE, URL_BOARD_REPO, URL_PACK_REPO } from "~/consts";
-import { Board } from "~/files";
+import { Target } from "~/files";
 import { pathState } from "../0_sys/directory";
 import { flatten } from "./util";
 
@@ -37,7 +37,7 @@ export const boardsState = selector({
       boardList.map(async ({ owner, name, version }) => {
         const boardFile = await window.ipc.fs
           .read([...home, BOARD_DIR, owner, name, version, BOARD_FILE])
-          .then((str) => load(str) as Board);
+          .then((str) => load(str) as Target);
         return { ...boardFile, owner, name, version };
       }),
     );

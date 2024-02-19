@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useRecoilValue } from "recoil";
-import { Board } from "~/files";
+import { Target } from "~/files";
 import { Position, posRound } from "~/utils";
 import { PackKey, packEq, packToString } from "~/web/1_type";
 import {
@@ -88,7 +88,7 @@ const DummyIoport: FC<{ ioifName: string; ioName: string }> = ({ ioifName, ioNam
   const [x, y] = posRound(useRecoilValue(mousePositionState));
   const packs = useRecoilValue(localPacksState);
   const board = useRecoilValue(boardState);
-  const ioif = board.ioifs.find(({ type }) => type === ioifName) as Board["ioifs"][number];
+  const ioif = board.ioifs.find(({ type }) => type === ioifName) as Target["ioifs"][number];
   if (ioif === undefined)
     return (
       <text x={x} y={y}>

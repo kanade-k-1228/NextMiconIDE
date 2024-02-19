@@ -1,4 +1,15 @@
-import { Code, KeyboardArrowLeft, KeyboardArrowRight, PriorityHigh, SvgIconComponent } from "@mui/icons-material";
+import {
+  AccessTime,
+  Code,
+  DataArray,
+  DataObject,
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+  Numbers,
+  Percent,
+  PriorityHigh,
+  SvgIconComponent,
+} from "@mui/icons-material";
 import { FC, useState } from "react";
 import { useRecoilState } from "recoil";
 import { hwEditorFSM, useColor } from "~/web/2_store";
@@ -9,19 +20,19 @@ const primitives = [
   { type: "out", nameSel: "select", Icon: KeyboardArrowLeft },
   { type: "inout", nameSel: "select", Icon: Code },
   { type: "irq", nameSel: "select", Icon: PriorityHigh },
-  // { type: "in_reg", nameSel: "none", Icon: Numbers },
-  // { type: "out_reg", nameSel: "none", Icon: Numbers },
-  // { type: "clk", nameSel: "none", Icon: AccessTime },
-  // { type: "slice", nameSel: "none", Icon: DataArray },
-  // { type: "concat", nameSel: "none", Icon: DataObject },
-  // { type: "const", nameSel: "none", Icon: Percent },
-  // { type: "verilog", nameSel: "none", Icon: Code },
+  { type: "in_reg", nameSel: "input", Icon: Numbers },
+  { type: "out_reg", nameSel: "input", Icon: Numbers },
+  { type: "dff", nameSel: "none", Icon: AccessTime },
+  { type: "slice", nameSel: "none", Icon: DataArray },
+  { type: "concat", nameSel: "none", Icon: DataObject },
+  { type: "const", nameSel: "none", Icon: Percent },
+  { type: "verilog", nameSel: "none", Icon: Code },
 ] as { type: string; nameSel: "select" | "input" | "none"; Icon: SvgIconComponent }[];
 
 export const PrimPane: FC = () => {
   const color = useColor().editor.hw.pane._;
   return (
-    <div style={{ ...css.colGrid({ column: [40, null, null], row: 40 }), overflowY: "scroll", background: color.bg, color: color.text }}>
+    <div style={{ ...css.colGrid({ column: [40, "auto", "2fr"], row: 40 }), overflowY: "scroll", background: color.bg, color: color.text }}>
       {primitives.map(({ type, Icon, nameSel }) => (
         <PrimItem key={type} type={type} nameSel={nameSel} Icon={Icon} />
       ))}
@@ -62,7 +73,16 @@ const PrimItem: FC<{ type: string; nameSel: "select" | "input" | "none"; Icon: S
       <div style={{ padding: 5 }}>
         {nameSel === "select" && (
           <select
-            style={{ height: "100%", width: "100%", cursor: "pointer" }}
+            style={{
+              height: "100%",
+              width: "100%",
+              outline: "none",
+              borderWidth: 1.5,
+              borderRadius: 4,
+              cursor: "pointer",
+              background: _color.bg,
+              color: _color.text,
+            }}
             onChange={(e) => {
               setName(e.target.value);
               if (e.target.value !== NULL_NAME) {
@@ -72,12 +92,29 @@ const PrimItem: FC<{ type: string; nameSel: "select" | "input" | "none"; Icon: S
             value={name}
           >
             <option>{NULL_NAME}</option>
+            <option>{NULL_NAME}</option>
+            <option>{NULL_NAME}</option>
+
             {/* {available.map((s) => (
               <option key={s}>{s}</option>
             ))} */}
           </select>
         )}
-        {nameSel === "input" && <input style={{ height: "100%", width: "100%", boxSizing: "inherit" }} />}
+        {nameSel === "input" && (
+          <input
+            style={{
+              height: "100%",
+              width: "100%",
+              outline: "none",
+              borderWidth: 1.5,
+              borderRadius: 4,
+              borderStyle: "solid",
+              boxSizing: "inherit",
+              background: _color.bg,
+              color: _color.text,
+            }}
+          />
+        )}
       </div>
     </div>
   );

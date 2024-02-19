@@ -1,7 +1,7 @@
 import { dump, load } from "js-yaml";
 import { useRecoilValue, useRecoilValueLoadable, useResetRecoilState, useSetRecoilState } from "recoil";
 import { BOARD_DIR, BOARD_FILE, PROJ_FILE } from "~/consts";
-import { Board, Project } from "~/files";
+import { Target, Project } from "~/files";
 import { useMessage } from "../0_sys/message";
 import { localPacksState } from "../1_library/1_packs";
 import { useResetHweditorState } from "../4_view/editor";
@@ -34,7 +34,7 @@ export const useOpenProject = () => {
       // ----------------------------------------------------------------------
       window.log.info("openProject: Load Board");
       const boardPath = [...appHome, BOARD_DIR, ...proj.target];
-      const board = await window.ipc.fs.read([...boardPath, BOARD_FILE]).then((str) => load(str) as Board);
+      const board = await window.ipc.fs.read([...boardPath, BOARD_FILE]).then((str) => load(str) as Target);
       // ----------------------------------------------------------------------
       setProjectPath(path);
       setProjectName(path.at(-1) as string);

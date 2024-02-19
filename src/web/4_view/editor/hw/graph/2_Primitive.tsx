@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Board, Obj } from "~/files";
+import { Obj, Target } from "~/files";
 import { Position, posAdd, posFlip, posSub } from "~/utils";
 import { useColor } from "~/web/2_store";
 import { usePrim } from "~/web/3_facade";
@@ -55,7 +55,7 @@ export const PrimitiveComponent: FC<{ obj: Obj }> = ({ obj }) => {
   );
 };
 
-export const IoifView: FC<{ ioif: Board["ioifs"][number]; ioName: string; pos: Position; flip: boolean }> = ({
+export const IoifView: FC<{ ioif: Target["ioifs"][number]; ioName: string; pos: Position; flip: boolean }> = ({
   ioif,
   ioName,
   pos,
@@ -104,7 +104,7 @@ export const IoifView: FC<{ ioif: Board["ioifs"][number]; ioName: string; pos: P
 };
 
 const IOPortBg: FC<{
-  port: Board["ioifs"][number]["ports"][number];
+  port: Target["ioifs"][number]["ports"][number];
   origin: Position;
   hover: boolean;
   flip: boolean;
@@ -117,7 +117,7 @@ const IOPortBg: FC<{
 };
 
 const IOPortIcon: FC<{
-  port: Board["ioifs"][number]["ports"][number];
+  port: Target["ioifs"][number]["ports"][number];
   origin: Position;
   hover: boolean;
   flip: boolean;
