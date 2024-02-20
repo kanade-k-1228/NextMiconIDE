@@ -24,29 +24,67 @@ export const ObjView: FC<{ node: Obj<ObjResolveExt> }> = ({ node }) => {
 // --------------------------------------------------------------------------------
 
 const MemView: FC<{ mem: Mem<ObjResolveExt> }> = ({ mem }) => {
-  const [x, y] = mem.pos;
+  const { onClick, onMouseDown, selected } = useObj(mem);
+
   return (
-    <g x={x} y={y}>
-      <text>Mem:{mem.name}</text>
-    </g>
+    <ObjAtom
+      left_ports={mem.variant === "RO" ? [{ name: "out", direct: "out" }] : [{ name: "in", direct: "in" }]}
+      right_ports={[]}
+      pos={mem.pos}
+      flip={false}
+      name={mem.name}
+      port_name={false}
+      width={mem.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
   );
 };
 
 const IrqView: FC<{ irq: Irq<ObjResolveExt> }> = ({ irq }) => {
-  const [x, y] = irq.pos;
+  const { onClick, onMouseDown, key, selected } = useObj(irq);
   return (
-    <g x={x} y={y}>
-      <text>Mem:{irq.name}</text>
-    </g>
+    <ObjAtom
+      left_ports={[{ name: "in", direct: "in" }]}
+      right_ports={[]}
+      pos={irq.pos}
+      flip={false}
+      name={irq.name}
+      port_name={false}
+      width={irq.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
   );
 };
 
 const PortView: FC<{ port: Port<ObjResolveExt> }> = ({ port }) => {
-  const [x, y] = port.pos;
+  const { onClick, onMouseDown, key, selected } = useObj(port);
   return (
-    <g x={x} y={y}>
-      <text>Port:{port.name}</text>
-    </g>
+    <ObjAtom
+      left_ports={
+        port.variant === "In"
+          ? [{ name: "out", direct: "out" }]
+          : port.variant === "Out"
+            ? [{ name: "in", direct: "in" }]
+            : [
+                { name: "iosel", direct: "in" },
+                { name: "in", direct: "in" },
+                { name: "out", direct: "out" },
+              ]
+      }
+      right_ports={[]}
+      pos={port.pos}
+      flip={false}
+      name={port.name}
+      port_name={false}
+      width={port.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
   );
 };
 
@@ -148,61 +186,113 @@ const getTextStyle = (lhs: number, rhs: number) => {
 };
 
 const ObjAtom: FC<{
-  left_ports: string[];
-  right_ports: string[];
+  left_ports: { name: string; direct: "in" | "out" }[];
+  right_ports: { name: string; direct: "in" | "out" }[];
   name: string;
   pos: Position;
   flip: boolean;
   port_name: boolean;
   width: number;
-}> = ({ left_ports, right_ports, name, pos, port_name, width }) => {
+  highlight: boolean;
+  onClick: (_: any) => any;
+  onMouseDown: (_: any) => any;
+}> = ({ left_ports, right_ports, name, pos, port_name, width, highlight, onClick, onMouseDown }) => {
   // Global State
   const color = useColor().editor.hw.graph.obj;
 
   // Local State
-  // const [hover, setHover] = useState(false);
+  const [hover, setHover] = useState(false);
 
   // Calculate
-  const height = Math.max(left_ports.length, right_ports.length) * 40;
-
+  const height = Math.max(left_ports.length, right_ports.length) * 40 - 6;
   const text_style = getTextStyle(left_ports.length, right_ports.length);
   const [ox, oy] = pos;
-  const highlight = true;
+  const _color = highlight || hover ? color.hov : color._;
 
   return (
-    <g style={{ cursor: "pointer" }}>
+    <g
+      onMouseOver={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+      style={{ cursor: "pointer" }}
+    >
       <rect
         x={ox - width / 2}
         y={oy - height / 2}
         width={width}
         height={height}
-        stroke={highlight ? color.hov.border : color._.border}
+        stroke={_color.border}
         strokeWidth={2}
-        rx={20}
-        fill={highlight ? color.hov.fill : color._.fill}
+        rx={17}
+        fill={_color.fill}
       />
       {text_style === "center" && (
-        <text x={ox} y={oy} textAnchor="middle" alignmentBaseline="middle">
+        <text x={ox} y={oy} fontSize={25} textAnchor="middle" alignmentBaseline="middle">
           {name}
         </text>
       )}
       {text_style === "right" && (
-        <text x={ox + width / 2} y={oy} textAnchor="end" alignmentBaseline="middle">
+        <text x={ox + width / 2 - 20} y={oy} fontSize={25} textAnchor="end" alignmentBaseline="middle">
           {name}
         </text>
       )}
       {text_style === "left" && (
-        <text x={ox - width / 2} y={oy} textAnchor="start" alignmentBaseline="middle">
+        <text x={ox - width / 2 + 20} y={oy} fontSize={25} textAnchor="start" alignmentBaseline="middle">
           {name}
         </text>
       )}
-      {left_ports.map((port) => (
-        <></>
+      {left_ports.map(({ name, direct }, i, arr) => (
+        <ObjPort
+          side="left"
+          name={port_name ? name : ""}
+          direct={direct}
+          pos={posAdd(pos, [-width / 2 + 17, (i - (arr.length - 1) / 2) * 40])}
+          hov={hover}
+        />
       ))}
-      {right_ports.map((port) => (
-        <></>
+      {right_ports.map(({ name, direct }, i, arr) => (
+        <ObjPort
+          side="right"
+          name={port_name ? name : ""}
+          direct={direct}
+          pos={posAdd(pos, [width / 2 - 17, (i - (arr.length - 1) / 2) * 40])}
+          hov={hover}
+        />
       ))}
     </g>
+  );
+};
+
+const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "left" | "right"; hov: boolean }> = ({
+  name,
+  pos,
+  direct,
+  side,
+  hov,
+}) => {
+  const TEXT_OFFSET = 17;
+  const color = useColor().editor.hw.graph.obj;
+  const [cx, cy] = pos;
+  const _color = hov ? color.hov : color._;
+  return (
+    <>
+      <circle cx={cx} cy={cy} r={14} fill={_color.port_bg} />
+      {(direct === "in") === (side === "left") ? (
+        <RightIcon cx={cx} cy={cy} color={_color.port_icon} />
+      ) : (
+        <LeftIcon cx={cx} cy={cy} color={_color.port_icon} />
+      )}
+      <text
+        x={side === "left" ? cx + TEXT_OFFSET : cx - TEXT_OFFSET}
+        y={cy}
+        fontSize={18}
+        textAnchor={side === "left" ? "start" : "end"}
+        alignmentBaseline="middle"
+      >
+        {name}
+      </text>
+    </>
   );
 };
 
@@ -223,137 +313,3 @@ const PortInfo: FC<{ port: Pack["ports"][number]; origin: Position; hover: boole
     </>
   );
 };
-
-// export const PrimitiveComponent: FC<{ obj: Obj }> = ({ obj }) => {
-//   // Global State
-//   const { selected, onClick, onMouseDown } = usePrim(obj);
-//   const color = useColor().editor.hw.graph.obj;
-
-//   // Local State
-//   const [hover, setHover] = useState(false);
-
-//   // Calculate
-//   const [width, height] = posSub(obj.pack.size, [0, 4]);
-//   const [ox, oy] = obj.pos;
-//   const highlight = selected ? selected : hover;
-
-//   return (
-//     <g
-//       onMouseOver={() => setHover(true)}
-//       onMouseLeave={() => setHover(false)}
-//       style={{ cursor: "pointer" }}
-//       onClick={onClick}
-//       onMouseDown={onMouseDown}
-//     >
-//       <rect
-//         x={ox - width / 2}
-//         y={oy - height / 2}
-//         width={width}
-//         height={height}
-//         stroke={highlight ? color.hov.border : color._.border}
-//         strokeWidth={2}
-//         rx={18}
-//         fill={highlight ? color.hov.fill : color._.fill}
-//       />
-//       <text
-//         x={obj.flip ? ox - width / 2 + 40 : ox + width / 2 - 40}
-//         y={oy}
-//         fontSize={22}
-//         textAnchor={obj.flip ? "start" : "end"}
-//         alignmentBaseline="middle"
-//       >
-//         {obj.name}
-//       </text>
-//       {obj.pack.ports.map((port) => (
-//         <IOPortBg key={port.name} port={port} flip={obj.flip ?? false} hover={highlight} origin={obj.pos} />
-//       ))}
-//       {obj.pack.ports.map((port) => (
-//         <IOPortIcon key={port.name} port={port} flip={obj.flip ?? false} hover={highlight} origin={obj.pos} />
-//       ))}
-//     </g>
-//   );
-// };
-
-// export const IoifView: FC<{ ioif: Target["ioifs"][number]; ioName: string; pos: Position; flip: boolean }> = ({
-//   ioif,
-//   ioName,
-//   pos,
-//   flip,
-// }) => {
-//   // Global State
-//   const color = useColor().editor.hw.graph.obj;
-
-//   // Local State
-//   const [hover, setHover] = useState(false);
-
-//   // Calculate
-//   const [width, height] = posSub(ioif.size, [0, 4]);
-//   const [ox, oy] = pos;
-//   const highlight = true;
-
-//   return (
-//     <g onMouseOver={() => setHover(true)} onMouseLeave={() => setHover(false)} style={{ cursor: "pointer" }}>
-//       <rect
-//         x={ox - width / 2}
-//         y={oy - height / 2}
-//         width={width}
-//         height={height}
-//         stroke={highlight ? color.hov.border : color._.border}
-//         strokeWidth={2}
-//         rx={18}
-//         fill={highlight ? color.hov.fill : color._.fill}
-//       />
-//       <text
-//         x={flip ? ox - width / 2 + 40 : ox + width / 2 - 40}
-//         y={oy}
-//         fontSize={22}
-//         textAnchor={flip ? "start" : "end"}
-//         alignmentBaseline="middle"
-//       >
-//         {ioName}
-//       </text>
-//       {ioif.ports.map((port) => (
-//         <IOPortBg key={port.name} port={port} flip={flip} hover={highlight} origin={pos} />
-//       ))}
-//       {ioif.ports.map((port) => (
-//         <IOPortIcon key={port.name} port={port} flip={flip} hover={highlight} origin={pos} />
-//       ))}
-//     </g>
-//   );
-// };
-
-// const IOPortBg: FC<{
-//   port: Target["ioifs"][number]["ports"][number];
-//   origin: Position;
-//   hover: boolean;
-//   flip: boolean;
-// }> = ({ port, origin, hover, flip }) => {
-//   const side = port.pos[0] > 0 !== flip;
-//   const color = useColor().editor.hw.graph.obj;
-//   const [x, y] = posAdd(origin, flip ? posFlip(port.pos) : port.pos);
-//   const [cx, cy] = side ? [x - 18, y] : [x + 18, y];
-//   return <circle cx={cx} cy={cy} r={14} fill={hover ? color.hov.port_bg : color._.port_bg} />;
-// };
-
-// const IOPortIcon: FC<{
-//   port: Target["ioifs"][number]["ports"][number];
-//   origin: Position;
-//   hover: boolean;
-//   flip: boolean;
-// }> = ({ port, origin, hover, flip }) => {
-//   const side = port.pos[0] > 0 !== flip;
-//   const color = useColor().editor.hw.graph.obj;
-//   const [x, y] = posAdd(origin, flip ? posFlip(port.pos) : port.pos);
-//   const io = port.direct === "input";
-//   const [cx, cy] = side ? [x - 18, y] : [x + 18, y];
-//   const icon = port.icon;
-
-//   const _color = hover ? color.hov.port_icon : color._.port_icon;
-//   return (
-//     <>
-//       {icon === "!" && <ExclamationIcon cx={cx} cy={cy} color={_color} />}
-//       {icon === "?" && <QuestionIcon cx={cx} cy={cy} color={_color} />}
-//       {icon === undefined && (side === io ? <LeftIcon cx={cx} cy={cy} color={_color} /> : <RightIcon cx={cx} cy={cy} color={_color} />)}
-//     </>
-//   );
-// };

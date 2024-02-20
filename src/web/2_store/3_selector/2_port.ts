@@ -19,7 +19,16 @@ export const portsState = selector<Port[]>({
             pos: posAdd(obj.pos, obj.flip ? posFlip(port.pos) : port.pos),
           }));
         case "Mem":
-          return [];
+          return [
+            {
+              key: `${obj.name}/out`,
+              object: obj.name,
+              name: "out",
+              direct: "output",
+              width: 1,
+              pos: posAdd(obj.pos, obj.flip ? posFlip([obj.width / 2, 0]) : [obj.width / 2, 0]),
+            },
+          ];
         case "Irq":
           return [];
         case "Port":
@@ -27,7 +36,7 @@ export const portsState = selector<Port[]>({
         case "Reg":
           return [];
       }
-    });
+    }) as Port[];
     return objsPorts;
   },
 });

@@ -57,9 +57,9 @@ export const PrimPane: FC = () => {
   const color = useColor().editor.hw.pane._;
 
   return (
-    <div style={{ ...css.colGrid({ column: [40, "auto", "2fr"], row: 40 }), overflowY: "scroll", background: color.bg, color: color.text }}>
-      <PortIn txt={DOC["In"]} Icon={KeyboardArrowRight} />
-      <PortOut txt={DOC["Out"]} Icon={KeyboardArrowLeft} />
+    <div style={{ ...css.colGrid({ column: [40, "auto", null], row: 40 }), overflowY: "scroll", background: color.bg, color: color.text }}>
+      <PortIn txt={DOC["In"]} Icon={KeyboardArrowLeft} />
+      <PortOut txt={DOC["Out"]} Icon={KeyboardArrowRight} />
       <PortInOut txt={DOC["InOut"]} Icon={Code} />
       <Irq txt={DOC["Irq"]} Icon={PriorityHigh} />
       <MemRO txt={DOC["MemRO"]} Icon={Numbers} />

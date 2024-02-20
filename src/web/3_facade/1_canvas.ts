@@ -33,7 +33,7 @@ export const useCanvasForeground = () => {
           ...fsm.value,
           pos: posRound(mousePosition),
           flip: false,
-          width: 100, // TODO
+          width: 120, // TODO
         });
         setState({ state: "Default", value: {} });
       }
