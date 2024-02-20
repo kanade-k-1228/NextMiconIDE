@@ -3,12 +3,14 @@ import {
   Code,
   DataArray,
   DataObject,
+  FormatListNumbered,
   KeyboardArrowLeft,
   KeyboardArrowRight,
   Memory,
   Numbers,
   Percent,
   PriorityHigh,
+  Share,
   SvgIconComponent,
 } from "@mui/icons-material";
 import { FC, useState } from "react";
@@ -24,12 +26,14 @@ const DOC_JA = {
   Out: "出力ピン",
   InOut: "入出力ピン",
   Irq: "割り込みトリガ",
-  MemRO: "読み取り専用メモリ",
-  MemRW: "メモリ",
+  MemRO: "入力レジスタ",
+  MemRW: "出力レジスタ",
   Reg: "フリップフロップ",
-  Slice: "分割",
-  Concat: "連結",
-  Const: "定数",
+  Lut: "真理値表",
+  Fsm: "有限状態機械",
+  Slice: "配線の分割",
+  Concat: "配線の連結",
+  Const: "定数値",
   Vmod: "Verilogモジュール",
 };
 const DOC_EN = {
@@ -40,25 +44,29 @@ const DOC_EN = {
   MemRO: "Read Only Reg",
   MemRW: "Read & Write Reg",
   Reg: "DFF Registor",
+  Lut: "Look up table",
+  Fsm: "Finite State Machine",
   Slice: "Slice Wire",
   Concat: "Concat Wire",
-  Const: "Const",
+  Const: "Const Value",
   Vmod: "Verilog Module",
 };
-const DOC = DOC_EN;
+const DOC = DOC_JA;
 
 export const PrimPane: FC = () => {
   const color = useColor().editor.hw.pane._;
 
   return (
     <div style={{ ...css.colGrid({ column: [40, "auto", "2fr"], row: 40 }), overflowY: "scroll", background: color.bg, color: color.text }}>
-      <In txt={DOC["In"]} Icon={KeyboardArrowRight} />
-      <Out txt={DOC["Out"]} Icon={KeyboardArrowLeft} />
-      <InOut txt={DOC["InOut"]} Icon={Code} />
+      <PortIn txt={DOC["In"]} Icon={KeyboardArrowRight} />
+      <PortOut txt={DOC["Out"]} Icon={KeyboardArrowLeft} />
+      <PortInOut txt={DOC["InOut"]} Icon={Code} />
       <Irq txt={DOC["Irq"]} Icon={PriorityHigh} />
       <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
       <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
       <Reg txt={DOC["Reg"]} Icon={AccessTime} />
+      <Reg txt={DOC["Lut"]} Icon={FormatListNumbered} />
+      <Reg txt={DOC["Fsm"]} Icon={Share} />
       <Reg txt={DOC["Slice"]} Icon={DataArray} />
       <Reg txt={DOC["Concat"]} Icon={DataObject} />
       <Reg txt={DOC["Const"]} Icon={Percent} />
@@ -67,7 +75,7 @@ export const PrimPane: FC = () => {
   );
 };
 
-const In: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+const PortIn: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
   return (
     <PrimSelect
@@ -82,7 +90,7 @@ const In: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   );
 };
 
-const Out: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+const PortOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
   return (
     <PrimSelect
@@ -97,7 +105,7 @@ const Out: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   );
 };
 
-const InOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+const PortInOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
   return (
     <PrimSelect

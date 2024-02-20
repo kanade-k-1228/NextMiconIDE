@@ -141,8 +141,7 @@ export const useAppendWaypoint = () => {
 // IsSelected
 // オブジェクトが選択されているか判定する
 
-export const instanceIsSelected = (selectedInstances: ObjKey[], find: ObjKey) =>
-  selectedInstances.find((inst) => objKeyEq(inst, find)) !== undefined;
+export const objIsSelected = (selectedObjs: ObjKey[], find: ObjKey) => selectedObjs.find((obj) => objKeyEq(obj, find)) !== undefined;
 
 export const wireIsSelected = (selectedWires: WireKey[], find: WireKey) =>
   selectedWires.find((wire) => wireKeyEq(wire, find)) !== undefined;
@@ -152,7 +151,7 @@ export const waypointIsSelected = (selectedWaypoints: WaypointKey[], find: Waypo
 
 export const useInstanceIsSelected = (find: ObjKey) => {
   const selectedObjects = useRecoilValue(selectedObjectsResolvedState);
-  return instanceIsSelected(selectedObjects.objs, find);
+  return objIsSelected(selectedObjects.objs, find);
 };
 
 export const useWireIsSelected = (find: WireKey) => {

@@ -3,7 +3,7 @@ import { Inst, Irq, Mem, Obj, Port, Reg } from "~/types";
 import { Position, posAdd, posFlip } from "~/utils";
 import { Pack } from "~/web/1_type";
 import { ObjResolveExt, useColor } from "~/web/2_store";
-import { useInst } from "~/web/3_facade";
+import { useObj } from "~/web/3_facade";
 import { LeftIcon, RightIcon } from "~/web/4_view/atom";
 
 export const ObjView: FC<{ node: Obj<ObjResolveExt> }> = ({ node }) => {
@@ -51,17 +51,54 @@ const PortView: FC<{ port: Port<ObjResolveExt> }> = ({ port }) => {
 };
 
 const RegView: FC<{ reg: Reg<ObjResolveExt> }> = ({ reg }) => {
-  const [x, y] = reg.pos;
+  // Global State
+  const { onClick, onMouseDown, key, selected } = useObj(reg);
+  const color = useColor().editor.hw.graph.obj;
+
+  // Local State
+  const [hover, setHover] = useState(false);
+
+  // Calculate
+  const [width, height] = [40, 40];
+  const [ox, oy] = reg.pos;
+  const highlight = selected ? selected : hover;
+
+  const CLOCK = [
+    [10, 40],
+    [20, 25],
+    [30, 40],
+  ] as const;
+
   return (
-    <g x={x} y={y}>
-      <text>Reg:{reg.name}</text>
+    <g
+      onMouseOver={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ cursor: "pointer" }}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    >
+      <rect
+        x={ox}
+        y={oy}
+        width={width}
+        height={height}
+        stroke={highlight ? color.hov.border : color._.border}
+        strokeWidth={2}
+        fill={highlight ? color.hov.fill : color._.fill}
+      />
+      <polyline
+        stroke={highlight ? color._.fill : color._.border}
+        points={CLOCK.map(([x, y]) => `${ox + x},${oy + y}`).join(" ")}
+        fill="none"
+        strokeWidth={3}
+      />
     </g>
   );
 };
 
 const InstView: FC<{ inst: Inst<ObjResolveExt> }> = ({ inst }) => {
   // Global State
-  const { onClick, onMouseDown, key, selected } = useInst(inst);
+  const { onClick, onMouseDown, key, selected } = useObj(inst);
   const color = useColor().editor.hw.graph.obj;
 
   // Local State

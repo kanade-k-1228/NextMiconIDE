@@ -8,17 +8,24 @@ export const portsState = selector<Port[]>({
   get: ({ get }) => {
     const objs = get(objResolvedState);
     const objsPorts = objs.flatMap((obj) => {
-      if (obj.obj === "Inst") {
-        return obj.pack.ports.map((port) => ({
-          key: `${obj.name}/${port.name}`,
-          object: obj.name,
-          name: port.name,
-          direct: port.direct,
-          width: port.width,
-          pos: posAdd(obj.pos, obj.flip ? posFlip(port.pos) : port.pos),
-        }));
-      } else {
-        return [];
+      switch (obj.obj) {
+        case "Inst":
+          return obj.pack.ports.map((port) => ({
+            key: `${obj.name}/${port.name}`,
+            object: obj.name,
+            name: port.name,
+            direct: port.direct,
+            width: port.width,
+            pos: posAdd(obj.pos, obj.flip ? posFlip(port.pos) : port.pos),
+          }));
+        case "Mem":
+          return [];
+        case "Irq":
+          return [];
+        case "Port":
+          return [];
+        case "Reg":
+          return [];
       }
     });
     return objsPorts;

@@ -3,6 +3,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { Obj } from "~/types";
 import { getObjKey } from "~/web/1_type";
 import {
+  ObjResolveExt,
   hwEditorFSM,
   mousePositionState,
   useAppendInstance,
@@ -11,7 +12,7 @@ import {
   useSelectObject,
 } from "~/web/2_store";
 
-export const useInst = (inst: Obj) => {
+export const useObj = (obj: Obj<ObjResolveExt>) => {
   // Global State
   const [fsm, setState] = useRecoilState(hwEditorFSM);
   const mousePosition = useRecoilValue(mousePositionState);
@@ -20,11 +21,11 @@ export const useInst = (inst: Obj) => {
   const renameInstance = useRenameInstance();
 
   // Calculate
-  const key = getObjKey(inst);
+  const key = getObjKey(obj);
   const selected = useInstanceIsSelected(key);
   const select = () => selectInstance(key);
   const append = () => appendInstance(key);
-  const rename = (newName: string) => renameInstance(inst.name, newName);
+  const rename = (newName: string) => renameInstance(obj.name, newName);
   const onMouseDown: MouseEventHandler = (e) => {
     if (fsm.state === "Default") {
       if (!selected) select();

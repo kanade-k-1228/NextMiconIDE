@@ -5,7 +5,7 @@ import { Pack, getObjKey, packToString } from "~/web/1_type";
 import {
   boardState,
   hwEditorFSM,
-  instanceIsSelected,
+  objIsSelected,
   localPacksState,
   mousePositionState,
   projectState,
@@ -34,6 +34,12 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | {
 
     let addrAcc = Math.ceil(board.addr.reserved / board.addr.pageSize);
     return project.objs.map((obj) => {
+      // Resolve Position if moving
+      let pos = obj.pos;
+      if (state === "Moving" && objIsSelected(selectedObjects.objs, getObjKey(obj))) {
+        pos = posAdd(pos, posRound(posSub(mousePosition, value.start)));
+      }
+
       switch (obj.obj) {
         case "Inst": {
           // Resolve Package
@@ -47,25 +53,20 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | {
             addr = addrAcc;
             addrAcc += Math.ceil(pack.software.memSize / board.addr.pageSize);
           }
-          // Resolve Position if moving
-          let pos = obj.pos;
-          if (state === "Moving" && instanceIsSelected(selectedObjects.objs, getObjKey(obj))) {
-            pos = posAdd(pos, posRound(posSub(mousePosition, value.start)));
-          }
           const ret: Obj<ObjResolveExt> = { ...obj, pack, addr, pos };
           return { type: "obj", value: ret };
         }
         case "Mem": {
-          return { type: "obj", value: obj };
+          return { type: "obj", value: { ...obj, pos } };
         }
         case "Irq": {
-          return { type: "obj", value: obj };
+          return { type: "obj", value: { ...obj, pos } };
         }
         case "Port": {
-          return { type: "obj", value: obj };
+          return { type: "obj", value: { ...obj, pos } };
         }
         case "Reg": {
-          return { type: "obj", value: obj };
+          return { type: "obj", value: { ...obj, pos } };
         }
       }
     });

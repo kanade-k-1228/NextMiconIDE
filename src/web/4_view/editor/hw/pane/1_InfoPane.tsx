@@ -4,7 +4,7 @@ import { useRecoilValue } from "recoil";
 import { Obj } from "~/types";
 import { Wire, getWireKeyStr } from "~/web/1_type";
 import { ObjResolveExt, boardState, objResolvedState, projectState, useColor, wiresResolvedState } from "~/web/2_store";
-import { useInst, useWire } from "~/web/3_facade";
+import { useObj, useWire } from "~/web/3_facade";
 import { Center, IconButton, IconText, Left, css } from "~/web/4_view/atom";
 
 export const InfoPane: FC = () => {
@@ -53,7 +53,7 @@ const ObjList: FC = () => {
 
 const ObjListItem: FC<{ obj: Obj<ObjResolveExt> }> = ({ obj }) => {
   // Global State
-  const { selected, select, append, rename } = useInst(obj);
+  const { selected, select, append, rename } = useObj(obj);
   const color = useColor().editor.hw.pane.item;
 
   // Local State
@@ -76,8 +76,7 @@ const ObjListItem: FC<{ obj: Obj<ObjResolveExt> }> = ({ obj }) => {
         onClick={(e) => (e.ctrlKey ? append() : select())}
       >
         <div></div>
-        {/* TODO */}
-        <Left>{`obj.pack.name`}</Left>
+        <Left>{obj.obj}</Left>
         <Left>{obj.name}</Left>
         <IconButton color={color.btn} style={{ margin: "2px" }} onClick={() => setDetail(!detail)}>
           {detail ? <KeyboardArrowDown /> : <KeyboardArrowLeft />}
