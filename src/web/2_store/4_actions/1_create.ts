@@ -1,5 +1,5 @@
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Target, Obj, Project } from "~/files";
+import { Target, Node, Project } from "~/files";
 import { Position } from "~/utils";
 import { ObjKey, Port, Wire, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
 import { boardState, projectState } from "../2_project/0_project";
@@ -25,7 +25,7 @@ export const useGetNewObjName = () => {
   return (base: string) => getNewObjName(project, base);
 };
 
-export const createObj = (project: Project, newObj: Obj): Project => {
+export const createObj = (project: Project, newObj: Node): Project => {
   if (objExists(project, newObj.name)) throw `Object name duplicate: ${newObj.name}`;
   return { ...project, objs: [...project.objs, newObj] };
 };
@@ -34,7 +34,7 @@ export const useCreateObj = () => {
   const { commit } = useRevert();
   const [project, setProject] = useRecoilState(projectState);
   const selectInstance = useSelectObject();
-  return (newObj: Obj) => {
+  return (newObj: Node) => {
     setProject(createObj(project, newObj));
     commit();
     selectInstance(newObj.name);

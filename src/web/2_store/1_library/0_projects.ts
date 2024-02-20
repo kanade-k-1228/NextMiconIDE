@@ -20,7 +20,7 @@ export const useCreateProject = () => {
   return async (name: string, board: { owner: string; name: string; version: string }) => {
     // Create Micon
     await window.ipc.fs.mkdir([...home, PROJ_DIR, name]);
-    const init: Project = { target: [board.owner, board.name, board.version], objs: [], wires: [] };
+    const init: Project = { target: { path: [board.owner, board.name, board.version] }, objs: [], wires: [] };
     await window.ipc.fs.write([...home, PROJ_DIR, name, PROJ_FILE], dump(init));
     // Create Software
     await window.ipc.fs.mkdir([...home, PROJ_DIR, name, SW_DIR]);

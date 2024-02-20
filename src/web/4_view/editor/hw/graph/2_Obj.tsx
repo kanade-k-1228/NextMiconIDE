@@ -1,11 +1,10 @@
 import { FC, useState } from "react";
-import { Obj, Target } from "~/files";
+import { Node, Target } from "~/files";
 import { Position, posAdd, posFlip, posSub } from "~/utils";
 import { useColor } from "~/web/2_store";
-import { usePrim } from "~/web/3_facade";
 import { ExclamationIcon, LeftIcon, QuestionIcon, RightIcon } from "~/web/4_view/atom";
 
-export const PrimitiveComponent: FC<{ obj: Obj }> = ({ obj }) => {
+export const PrimitiveComponent: FC<{ obj: Node }> = ({ obj }) => {
   // Global State
   const { selected, onClick, onMouseDown } = usePrim(obj);
   const color = useColor().editor.hw.graph.obj;

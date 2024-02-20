@@ -52,7 +52,7 @@ const ModItem: FC<{ pack: PackKey }> = ({ pack }) => {
   const [hover, setHover] = useState(false);
 
   // Calculate
-  const selected = fsm.state === "AddInst" && packEq(fsm.value.mod, pack);
+  const selected = fsm.state === "Add" && packEq(fsm.value.mod, pack);
   const _color = selected ? color.sel : hover ? color.hov : color._;
 
   // TODO: this is random value
@@ -64,7 +64,7 @@ const ModItem: FC<{ pack: PackKey }> = ({ pack }) => {
       <div
         style={{ display: "flex", alignItems: "center" }}
         onClick={() => {
-          setState({ state: "AddInst", value: { mod: pack, name: getNewName(pack.name.toLocaleLowerCase()) } });
+          setState({ state: "Add", value: { mod: pack, name: getNewName(pack.name.toLocaleLowerCase()) } });
         }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}

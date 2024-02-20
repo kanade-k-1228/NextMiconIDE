@@ -28,7 +28,7 @@ export const useCanvasForeground = () => {
       }
     },
     onClick: (e: MouseEvent) => {
-      if (fsm.state === "AddInst") {
+      if (fsm.state === "Add") {
         createObj({
           node: "Inst",
           name: fsm.value.name,

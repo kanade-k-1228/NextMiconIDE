@@ -1,4 +1,4 @@
-import { Obj, Project } from "~/files";
+import { Node, Project } from "~/files";
 import { Wire, eqPortKey, wireName } from "~/web/1_type";
 import { cpp } from "./3_cppGen";
 import { VInstance, VWire, verilog } from "./2_verilogGen";
@@ -7,7 +7,7 @@ import { ObjResolveExt } from "../3_selector/1_obj";
 // ------------------------------------------------------------------------------------------------
 // 置換リスト
 
-export const genReplace = (objs: Obj<ObjResolveExt>[], wires: Wire[]): Record<string, string> => {
+export const genReplace = (objs: Node<ObjResolveExt>[], wires: Wire[]): Record<string, string> => {
   return {
     includes: genIncludes(objs),
     declarations: genDeclarations(objs),
@@ -26,19 +26,19 @@ export const genReplace = (objs: Obj<ObjResolveExt>[], wires: Wire[]): Record<st
 
 // TODO 依存関係解決と重複除去
 
-const genIncludes = (instances: Obj[]) => {
+const genIncludes = (instances: Node[]) => {
   const includes = instances
     .filter(({ addr }) => addr)
     .map(({ pack }) => cpp.include(`${pack.owner}/${pack.name}/${pack.version}/${pack.name}.hpp`));
   return includes.join("\n");
 };
 
-const genDeclarations = (instances: Obj[]) => {
+const genDeclarations = (instances: Node[]) => {
   const declarations = instances.filter(({ addr }) => addr).map(({ name, pack }) => cpp.declaration(pack.name, name));
   return declarations.join("\n");
 };
 
-const genDefinitions = (instances: Obj[]) => {
+const genDefinitions = (instances: Node[]) => {
   const instantiations = instances
     .filter(({ addr }) => addr)
     .map(({ name, pack, addr }) => cpp.instantiation(pack.name, name, `(volatile uint32_t*)0x${addr}00'0000`));
@@ -48,7 +48,7 @@ const genDefinitions = (instances: Obj[]) => {
 // ------------------------------------------------------------------------------------------------
 // ハードウェア
 
-const genIOPort = (objs: Obj<ObjResolveExt>[]) => {
+const genIOPort = (objs: Node<ObjResolveExt>[]) => {
   return objs
     .flatMap((obj) => {
       switch (obj.node) {
@@ -65,7 +65,7 @@ const genIOPort = (objs: Obj<ObjResolveExt>[]) => {
     .join(",\n");
 };
 
-const genIOBuffer = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
+const genIOBuffer = (objs: Node<ObjResolveExt>[], wires: Wire[]) => {
   return objs
     .flatMap(({ name, pack }) => {
       if (pack.type === "inout") {
@@ -133,7 +133,7 @@ const genIOBuffer = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
     .join("\n");
 };
 
-const genIRQ = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
+const genIRQ = (objs: Node<ObjResolveExt>[], wires: Wire[]) => {
   return objs
     .flatMap(({ pack, name }) => {
       if (pack.type === "irq") {
@@ -149,7 +149,7 @@ const genIRQ = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
     .join("\n");
 };
 
-const genInstances = (instances: Obj[], wires: Wire[]) => {
+const genInstances = (instances: Node[], wires: Wire[]) => {
   return instances
     .map(({ name, addr, pack, params }) => {
       let vwires: VWire[] = [];
@@ -224,13 +224,13 @@ const genInstances = (instances: Obj[], wires: Wire[]) => {
     .join("\n\n");
 };
 
-const genMemReady = (instances: Obj[]) =>
+const genMemReady = (instances: Node[]) =>
   instances
     .filter(({ pack }) => pack.software)
     .map(({ name }) => `, ${name}_ready`)
     .join("");
 
-const genMemRdata = (instances: Obj[]) =>
+const genMemRdata = (instances: Node[]) =>
   instances
     .filter(({ pack }) => pack.software)
     .map(({ name }) => `: ${name}_ready ? ${name}_rdata`)

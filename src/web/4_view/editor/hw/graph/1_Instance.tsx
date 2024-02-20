@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Inst } from "~/files";
+import { Inst } from "~/types";
 import { Position, posAdd, posFlip } from "~/utils";
 import { Pack } from "~/web/1_type";
 import { ObjResolveExt, useColor } from "~/web/2_store";

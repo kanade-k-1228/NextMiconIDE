@@ -1,5 +1,5 @@
 import { selector } from "recoil";
-import { Obj } from "~/files";
+import { Node } from "~/files";
 import { posAdd, posRound, posSub } from "~/utils";
 import { Pack, getObjKey, packToString } from "~/web/1_type";
 import {
@@ -22,7 +22,7 @@ export type ObjResolveExt = {
   Reg: object;
 };
 
-const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | { type: "error"; value: ObjError })[]>({
+const objResolveState = selector<({ type: "obj"; value: Node<ObjResolveExt> } | { type: "error"; value: ObjError })[]>({
   key: "objResolve",
   get: ({ get }) => {
     const project = get(projectState);
@@ -52,7 +52,7 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | {
           if (state === "Moving" && instanceIsSelected(selectedObjects.objs, getObjKey(obj))) {
             pos = posAdd(pos, posRound(posSub(mousePosition, value.start)));
           }
-          const ret: Obj<ObjResolveExt> = { ...obj, pack, addr, pos };
+          const ret: Node<ObjResolveExt> = { ...obj, pack, addr, pos };
           return { type: "obj", value: ret };
         }
         case "Mem": {
@@ -72,7 +72,7 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | {
   },
 });
 
-export const objResolvedState = selector<Obj<ObjResolveExt>[]>({
+export const objResolvedState = selector<Node<ObjResolveExt>[]>({
   key: "objResolved",
   get: ({ get }) => {
     const instances = get(objResolveState);

@@ -33,7 +33,7 @@ export const useOpenProject = () => {
       console.log(proj);
       // ----------------------------------------------------------------------
       window.log.info("openProject: Load Board");
-      const boardPath = [...appHome, BOARD_DIR, ...proj.target];
+      const boardPath = [...appHome, BOARD_DIR, ...proj.target.path];
       const board = await window.ipc.fs.read([...boardPath, BOARD_FILE]).then((str) => load(str) as Target);
       // ----------------------------------------------------------------------
       setProjectPath(path);

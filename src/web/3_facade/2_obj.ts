@@ -1,6 +1,6 @@
 import { MouseEventHandler } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Obj } from "~/files";
+import { Node } from "~/files";
 import { getObjKey } from "~/web/1_type";
 import {
   hwEditorFSM,
@@ -11,7 +11,7 @@ import {
   useSelectObject,
 } from "~/web/2_store";
 
-export const useInst = (inst: Obj) => {
+export const useInst = (inst: Node) => {
   // Global State
   const [fsm, setState] = useRecoilState(hwEditorFSM);
   const mousePosition = useRecoilValue(mousePositionState);

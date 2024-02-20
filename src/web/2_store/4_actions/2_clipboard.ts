@@ -1,5 +1,5 @@
 import { atom, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { Obj, Wire, Project } from "~/files";
+import { Node, Wire, Project } from "~/files";
 import { Position, posAdd, posMid, posRound, posSub } from "~/utils";
 import { ObjKey, PortKey, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
 import { boardState, projectState } from "../2_project/0_project";
@@ -9,7 +9,7 @@ import { selectIsEmpty, selectedObjectsResolvedState } from "./0_select";
 import { createObj, createWire, getNewObjName } from "./1_create";
 
 interface Clipboard {
-  objs: Obj[];
+  objs: Node[];
   wires: Wire[];
 }
 

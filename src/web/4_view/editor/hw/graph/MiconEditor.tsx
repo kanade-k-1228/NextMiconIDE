@@ -15,7 +15,7 @@ import {
 } from "~/web/2_store";
 import { Canvas } from "./0_Canvas";
 import { InstView, PackView } from "./1_Instance";
-import { IoifView } from "./2_Primitive";
+import { IoifView } from "./2_Obj";
 import { PortComponent } from "./3_Port";
 import { WireComponent } from "./4_Wire";
 
@@ -34,7 +34,7 @@ export const MiconEditor: FC<{}> = () => {
       {fsm.state === "Wireing" && <ConnectingWire path={[fsm.value.startPos, ...fsm.value.path]} />}
       {wires?.map((wire, i) => <WireComponent key={i} wire={wire} />)}
       {ports?.map((port) => <PortComponent key={port.key} port={port} />)}
-      {fsm.state === "AddInst" && <DummyInstance pack={fsm.value.mod} name={fsm.value.name} />}
+      {fsm.state === "Add" && <DummyInstance pack={fsm.value.mod} name={fsm.value.name} />}
       {fsm.state === "AddPrim" && <DummyIoport ioifName={fsm.value.type} ioName={fsm.value.name} />}
     </Canvas>
   );
