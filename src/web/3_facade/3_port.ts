@@ -12,11 +12,11 @@ export const usePort = (port: Port) => {
   const onClick: MouseEventHandler = () => {
     if (fsm.state === "Default") {
       setState({
-        state: "Wireing",
+        state: "AddWire",
         value: { start: [port.object, port.name], startPos: port.pos, path: [] },
       });
     }
-    if (fsm.state === "Wireing") {
+    if (fsm.state === "AddWire") {
       addWire({
         first: fsm.value.start,
         last: [port.object, port.name],

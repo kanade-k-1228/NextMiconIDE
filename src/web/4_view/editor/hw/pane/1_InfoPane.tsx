@@ -1,7 +1,7 @@
 import { Apps, ArrowRightAlt, Check, DeveloperBoard, KeyboardArrowDown, KeyboardArrowLeft, Timeline } from "@mui/icons-material";
 import { FC, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Node } from "~/types";
+import { Obj } from "~/types";
 import { Wire, getWireKeyStr } from "~/web/1_type";
 import { ObjResolveExt, boardState, objResolvedState, projectState, useColor, wiresResolvedState } from "~/web/2_store";
 import { useInst, useWire } from "~/web/3_facade";
@@ -51,7 +51,7 @@ const ObjList: FC = () => {
   );
 };
 
-const ObjListItem: FC<{ obj: Node<ObjResolveExt> }> = ({ obj }) => {
+const ObjListItem: FC<{ obj: Obj<ObjResolveExt> }> = ({ obj }) => {
   // Global State
   const { selected, select, append, rename } = useInst(obj);
   const color = useColor().editor.hw.pane.item;

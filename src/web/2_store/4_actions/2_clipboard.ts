@@ -1,5 +1,5 @@
 import { atom, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { Node, Wire, Project } from "~/files";
+import { Project } from "~/files";
 import { Position, posAdd, posMid, posRound, posSub } from "~/utils";
 import { ObjKey, PortKey, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
 import { boardState, projectState } from "../2_project/0_project";
@@ -7,9 +7,10 @@ import { useRevert } from "../2_project/2_revert";
 import { mousePositionState } from "../4_editor/0_fsm";
 import { selectIsEmpty, selectedObjectsResolvedState } from "./0_select";
 import { createObj, createWire, getNewObjName } from "./1_create";
+import { Obj, ObjViewExt, Wire } from "~/types";
 
 interface Clipboard {
-  objs: Node[];
+  objs: Obj<ObjViewExt>[];
   wires: Wire[];
 }
 

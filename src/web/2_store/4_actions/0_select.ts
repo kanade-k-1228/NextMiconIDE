@@ -5,7 +5,7 @@ import { ObjKey, WaypointKey, Wire, WireKey, getWaypointKey, objKeyEq, waypointK
 import { ObjResolveExt, objResolvedState } from "../3_selector/1_obj";
 import { wiresResolvedState } from "../3_selector/3_wire";
 import { hwEditorFSM, mousePositionState } from "../4_editor/0_fsm";
-import { Node } from "~/files";
+import { Obj } from "~/types";
 
 export interface SelectedObjects {
   objs: ObjKey[];
@@ -48,10 +48,10 @@ export const useSelectWaypoint = () => {
 // RangeSelect
 // 範囲選択で選択されたオブジェクトを列挙する
 
-const objRangeSelect = (objs: Node<ObjResolveExt>[], rect: Rect): ObjKey[] => {
+const objRangeSelect = (objs: Obj<ObjResolveExt>[], rect: Rect): ObjKey[] => {
   return objs
     .filter((obj) => {
-      if (obj.node === "Inst") {
+      if (obj.obj === "Inst") {
         return corrision({ x: obj.pos[0], y: obj.pos[1], width: obj.pack.size[0], height: obj.pack.size[1] }, rect);
       }
     })

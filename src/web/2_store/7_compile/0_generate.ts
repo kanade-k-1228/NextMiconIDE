@@ -14,7 +14,7 @@ export const useGenerate = () => {
   return async () => {
     console.log("Generating...");
     console.table(instances);
-    const replaceList = genReplace(project, instances, ioports, wires);
+    const replaceList = genReplace(instances, wires);
     console.log(replaceList);
 
     // テンプレートを置換して生成

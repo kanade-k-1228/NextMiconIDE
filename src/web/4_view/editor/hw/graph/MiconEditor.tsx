@@ -1,23 +1,12 @@
 import { FC } from "react";
 import { useRecoilValue } from "recoil";
-import { Target } from "~/files";
+
 import { Position, posRound } from "~/utils";
-import { PackKey, packEq, packToString } from "~/web/1_type";
-import {
-  boardState,
-  hwEditorFSM,
-  localPacksState,
-  mousePositionState,
-  objResolvedState,
-  portsState,
-  useColor,
-  wiresResolvedState,
-} from "~/web/2_store";
+import { hwEditorFSM, mousePositionState, objResolvedState, portsState, useColor, wiresResolvedState } from "~/web/2_store";
 import { Canvas } from "./0_Canvas";
-import { InstView, PackView } from "./1_Instance";
-import { IoifView } from "./2_Obj";
-import { PortComponent } from "./3_Port";
-import { WireComponent } from "./4_Wire";
+import { ObjView } from "./1_Obj";
+import { PortComponent } from "./2_Port";
+import { WireComponent } from "./3_Wire";
 
 export const MiconEditor: FC<{}> = () => {
   const objs = useRecoilValue(objResolvedState);
@@ -27,15 +16,11 @@ export const MiconEditor: FC<{}> = () => {
   return (
     <Canvas>
       {fsm.state === "Selecting" && <SelectRect start={fsm.value.start} />}
-      {objs.map((obj) => {
-        if (obj.node === "Inst") return <InstView key={obj.name} inst={obj} />;
-        else return <></>;
-      })}
-      {fsm.state === "Wireing" && <ConnectingWire path={[fsm.value.startPos, ...fsm.value.path]} />}
+      {objs?.map((obj) => <ObjView key={obj.name} node={obj} />)}
+      {fsm.state === "AddWire" && <ConnectingWire path={[fsm.value.startPos, ...fsm.value.path]} />}
       {wires?.map((wire, i) => <WireComponent key={i} wire={wire} />)}
       {ports?.map((port) => <PortComponent key={port.key} port={port} />)}
-      {fsm.state === "Add" && <DummyInstance pack={fsm.value.mod} name={fsm.value.name} />}
-      {fsm.state === "AddPrim" && <DummyIoport ioifName={fsm.value.type} ioName={fsm.value.name} />}
+      {/* {fsm.state === "AddNode" && <DummyNode pack={fsm.value.mod} name={fsm.value.name} />} */}
     </Canvas>
   );
 };
@@ -68,32 +53,4 @@ const ConnectingWire: FC<{ path: Position[] }> = ({ path }) => {
       />
     </g>
   );
-};
-
-const DummyInstance: FC<{ pack: PackKey; name: string }> = ({ pack, name }) => {
-  // Global State
-  const [x, y] = posRound(useRecoilValue(mousePositionState));
-  const packs = useRecoilValue(localPacksState);
-  const packResolved = packs.find((p) => packEq(pack, p));
-  if (packResolved === undefined)
-    return (
-      <text x={x} y={y}>
-        {`Unknown package: ${packToString(pack)}`}
-      </text>
-    );
-  else return <PackView pack={packResolved} name={name} pos={[x, y]} />;
-};
-
-const DummyIoport: FC<{ ioifName: string; ioName: string }> = ({ ioifName, ioName }) => {
-  const [x, y] = posRound(useRecoilValue(mousePositionState));
-  const packs = useRecoilValue(localPacksState);
-  const board = useRecoilValue(boardState);
-  const ioif = board.ioifs.find(({ type }) => type === ioifName) as Target["ioifs"][number];
-  if (ioif === undefined)
-    return (
-      <text x={x} y={y}>
-        {`Unknown ioport: ${ioifName}`}
-      </text>
-    );
-  else return <IoifView ioif={ioif} ioName={ioName} pos={[x, y]} flip={false} />;
 };

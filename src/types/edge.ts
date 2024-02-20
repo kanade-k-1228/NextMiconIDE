@@ -1,8 +1,7 @@
 export type Wire = {
-  node: "Wire";
   first: [string, string];
   last: [string, string];
-  type: number;
+  width: number;
 } & EdgeView;
 
 type EdgeView = { waypoints: [number, number][] };

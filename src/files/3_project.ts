@@ -1,7 +1,9 @@
+import { Obj, ObjViewExt, Wire } from "~/types";
+
 export interface Project {
   target: {
     path: string[];
   };
-  objs: Node[];
+  objs: Obj<ObjViewExt>[];
   wires: Wire[];
 }

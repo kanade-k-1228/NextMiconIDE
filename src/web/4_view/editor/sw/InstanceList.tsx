@@ -1,7 +1,8 @@
 import { KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material";
 import { CSSProperties, FC, Fragment, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Func, Inst } from "~/files";
+import { Func } from "~/files";
+import { Inst } from "~/types";
 import { ObjResolveExt, objResolvedState, useColor, useSoftwareEditor } from "~/web/2_store";
 import { css } from "~/web/4_view/atom";
 
@@ -19,10 +20,10 @@ export const InstanceList = () => {
         }}
       >
         {objs
-          .filter((obj) => obj.node === "Inst" && obj.pack.software)
+          .filter((obj) => obj.obj === "Inst" && obj.pack.software)
           .toSorted((lhs, rhs) => (lhs.name > rhs.name ? 1 : -1))
           .flatMap((obj) => {
-            return obj.node === "Inst" ? [<InstanceDoc key={obj.name} inst={obj} />] : [];
+            return obj.obj === "Inst" ? [<InstanceDoc key={obj.name} inst={obj} />] : [];
           })}
       </div>
     </div>

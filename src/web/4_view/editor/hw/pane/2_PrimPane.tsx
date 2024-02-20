@@ -5,6 +5,7 @@ import {
   DataObject,
   KeyboardArrowLeft,
   KeyboardArrowRight,
+  Memory,
   Numbers,
   Percent,
   PriorityHigh,
@@ -14,54 +15,54 @@ import { FC, useState } from "react";
 import { useRecoilState } from "recoil";
 import { States, hwEditorFSM, useColor } from "~/web/2_store";
 import { Center, css } from "~/web/4_view/atom";
-import { Node } from "~/types";
+import { Obj } from "~/types";
 
-const primitives = [
-  { node: "Io", type: "in", nameSel: "select", Icon: KeyboardArrowRight },
-  { node: "Io", type: "out", nameSel: "select", Icon: KeyboardArrowLeft },
-  { node: "Io", type: "inout", nameSel: "select", Icon: Code },
-  { node: "Irq", type: "irq", nameSel: "select", Icon: PriorityHigh },
-  { node: "Reg", type: "in_reg", nameSel: "input", Icon: Numbers },
-  { node: "Reg", type: "out_reg", nameSel: "input", Icon: Numbers },
-  // { type: "dff", nameSel: "none", Icon: AccessTime },
-  // { type: "slice", nameSel: "none", Icon: DataArray },
-  // { type: "concat", nameSel: "none", Icon: DataObject },
-  // { type: "const", nameSel: "none", Icon: Percent },
-  // { type: "verilog", nameSel: "none", Icon: Code },
-] as { node: Node["node"]; type: string; nameSel: "select" | "input" | "none"; Icon: SvgIconComponent }[];
+// Primitive Elements
 
 const DOC_JA = {
-  in: "入力ピン",
-  out: "出力ピン",
-  inout: "入出力ピン",
-  irq: "割り込みトリガ",
-  memro: "読み取り専用メモリ",
-  memrw: "メモリ",
-  reg: "フリップフロップ",
+  In: "入力ピン",
+  Out: "出力ピン",
+  InOut: "入出力ピン",
+  Irq: "割り込みトリガ",
+  MemRO: "読み取り専用メモリ",
+  MemRW: "メモリ",
+  Reg: "フリップフロップ",
+  Slice: "分割",
+  Concat: "連結",
+  Const: "定数",
+  Vmod: "Verilogモジュール",
 };
 const DOC_EN = {
-  in: "Input Pin",
-  out: "Output Pin",
-  inout: "In&Out Pin",
-  irq: "Interruption Request",
-  memro: "Read Only Reg",
-  memrw: "Read&Write Reg",
-  reg: "DFF Registor",
+  In: "Input Pin",
+  Out: "Output Pin",
+  InOut: "In & Out Pin",
+  Irq: "Interruption Request",
+  MemRO: "Read Only Reg",
+  MemRW: "Read & Write Reg",
+  Reg: "DFF Registor",
+  Slice: "Slice Wire",
+  Concat: "Concat Wire",
+  Const: "Const",
+  Vmod: "Verilog Module",
 };
-const DOC = DOC_JA;
+const DOC = DOC_EN;
 
 export const PrimPane: FC = () => {
   const color = useColor().editor.hw.pane._;
 
   return (
     <div style={{ ...css.colGrid({ column: [40, "auto", "2fr"], row: 40 }), overflowY: "scroll", background: color.bg, color: color.text }}>
-      <In txt={DOC["in"]} Icon={KeyboardArrowRight} />
-      <Out txt={DOC["out"]} Icon={KeyboardArrowLeft} />
-      <InOut txt={DOC["inout"]} Icon={Code} />
-      <Irq txt={DOC["irq"]} Icon={KeyboardArrowRight} />
-      <MemRO txt={DOC["memro"]} Icon={Numbers} />
-      <MemRW txt={DOC["memrw"]} Icon={Numbers} />
-      <Reg txt={DOC["reg"]} Icon={AccessTime} />
+      <In txt={DOC["In"]} Icon={KeyboardArrowRight} />
+      <Out txt={DOC["Out"]} Icon={KeyboardArrowLeft} />
+      <InOut txt={DOC["InOut"]} Icon={Code} />
+      <Irq txt={DOC["Irq"]} Icon={PriorityHigh} />
+      <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
+      <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
+      <Reg txt={DOC["Reg"]} Icon={AccessTime} />
+      <Reg txt={DOC["Slice"]} Icon={DataArray} />
+      <Reg txt={DOC["Concat"]} Icon={DataObject} />
+      <Reg txt={DOC["Const"]} Icon={Percent} />
+      <Reg txt={DOC["Vmod"]} Icon={Memory} />
     </div>
   );
 };
@@ -72,11 +73,11 @@ const In: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.node === "Io" && fsm.value.direct === "In"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Port" && fsm.value.variant === "In"}
       name={name}
       nameSel={{ type: "list", list: ["pin1", "pin2", "pin3"] }}
       onNameChange={setName}
-      selValue={{ node: "Io", name: name, direct: "In" }}
+      selValue={{ obj: "Port", name: name, variant: "In" }}
     />
   );
 };
@@ -87,11 +88,11 @@ const Out: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.node === "Io" && fsm.value.direct === "Out"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Port" && fsm.value.variant === "Out"}
       name={name}
       nameSel={{ type: "list", list: ["pin1", "pin2", "pin3"] }}
       onNameChange={setName}
-      selValue={{ node: "Io", name: name, direct: "Out" }}
+      selValue={{ obj: "Port", name: name, variant: "Out" }}
     />
   );
 };
@@ -102,11 +103,11 @@ const InOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.node === "Io" && fsm.value.direct === "InOut"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Port" && fsm.value.variant === "InOut"}
       name={name}
       nameSel={{ type: "list", list: ["pin1", "pin2", "pin3"] }}
       onNameChange={setName}
-      selValue={{ node: "Io", name: name, direct: "InOut" }}
+      selValue={{ obj: "Port", name: name, variant: "InOut" }}
     />
   );
 };
@@ -117,11 +118,11 @@ const Irq: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.node === "Irq"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Irq"}
       name={name}
       nameSel={{ type: "list", list: ["irq3", "irq4", "irq5"] }}
       onNameChange={setName}
-      selValue={{ node: "Irq", name: name, sw_stmts: [] }}
+      selValue={{ obj: "Irq", name: name, sw_stmts: [] }}
     />
   );
 };
@@ -132,11 +133,11 @@ const MemRW: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.node === "Mem" && fsm.value.direct === "Write"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Mem" && fsm.value.variant === "RW"}
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ node: "Mem", direct: "Write", name: name, byte: 1 }}
+      selValue={{ obj: "Mem", variant: "RW", name: name, byte: 1 }}
     />
   );
 };
@@ -147,11 +148,11 @@ const MemRO: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.node === "Mem" && fsm.value.direct === "Read"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Mem" && fsm.value.variant === "RO"}
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ node: "Mem", direct: "Read", name: name, byte: 1 }}
+      selValue={{ obj: "Mem", variant: "RO", name: name, byte: 1 }}
     />
   );
 };
@@ -162,11 +163,11 @@ const Reg: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.node === "Reg"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Reg"}
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ node: "Reg", name: "reg0", type: "0" }}
+      selValue={{ obj: "Reg", name: "reg0", type: "0" }}
     />
   );
 };
@@ -178,7 +179,7 @@ const PrimSelect: FC<{
   nameSel: { type: "list"; list: string[] } | { type: "input" } | { type: "none" };
   name: string;
   Icon: SvgIconComponent;
-  selValue: Node;
+  selValue: Obj;
   isSelected: (state: States) => boolean;
   onNameChange: (s: string) => void;
 }> = ({ isSelected, txt, nameSel, name, Icon, selValue, onNameChange }) => {

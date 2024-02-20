@@ -1,5 +1,5 @@
 import { selector } from "recoil";
-import { Node } from "~/files";
+import { Obj, ObjViewExt } from "~/types";
 import { posAdd, posRound, posSub } from "~/utils";
 import { Pack, getObjKey, packToString } from "~/web/1_type";
 import {
@@ -20,9 +20,9 @@ export type ObjResolveExt = {
   Irq: object;
   Io: object;
   Reg: object;
-};
+} & ObjViewExt;
 
-const objResolveState = selector<({ type: "obj"; value: Node<ObjResolveExt> } | { type: "error"; value: ObjError })[]>({
+const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | { type: "error"; value: ObjError })[]>({
   key: "objResolve",
   get: ({ get }) => {
     const project = get(projectState);
@@ -34,12 +34,12 @@ const objResolveState = selector<({ type: "obj"; value: Node<ObjResolveExt> } | 
 
     let addrAcc = Math.ceil(board.addr.reserved / board.addr.pageSize);
     return project.objs.map((obj) => {
-      switch (obj.node) {
+      switch (obj.obj) {
         case "Inst": {
           // Resolve Package
-          const pack = packs.find((pack) => packToString(pack) === obj.mod_path.join("/"));
+          const pack = packs.find((pack) => packToString(pack) === obj.mod.join("/"));
           if (pack === undefined) {
-            return { type: "error", value: `Cannot find package: ${obj.mod_path.join("/")} @ instances.${obj.name}` };
+            return { type: "error", value: `Cannot find package: ${obj.mod.join("/")} @ instances.${obj.name}` };
           }
           // Resolve Address
           let addr: number | undefined = undefined;
@@ -52,7 +52,7 @@ const objResolveState = selector<({ type: "obj"; value: Node<ObjResolveExt> } | 
           if (state === "Moving" && instanceIsSelected(selectedObjects.objs, getObjKey(obj))) {
             pos = posAdd(pos, posRound(posSub(mousePosition, value.start)));
           }
-          const ret: Node<ObjResolveExt> = { ...obj, pack, addr, pos };
+          const ret: Obj<ObjResolveExt> = { ...obj, pack, addr, pos };
           return { type: "obj", value: ret };
         }
         case "Mem": {
@@ -61,7 +61,7 @@ const objResolveState = selector<({ type: "obj"; value: Node<ObjResolveExt> } | 
         case "Irq": {
           return { type: "obj", value: obj };
         }
-        case "Io": {
+        case "Port": {
           return { type: "obj", value: obj };
         }
         case "Reg": {
@@ -72,18 +72,18 @@ const objResolveState = selector<({ type: "obj"; value: Node<ObjResolveExt> } | 
   },
 });
 
-export const objResolvedState = selector<Node<ObjResolveExt>[]>({
+export const objResolvedState = selector<Obj<ObjResolveExt>[]>({
   key: "objResolved",
   get: ({ get }) => {
-    const instances = get(objResolveState);
-    return instances.flatMap((inst) => (inst.type === "obj" ? [inst.value] : []));
+    const objs = get(objResolveState);
+    return objs.flatMap((inst) => (inst.type === "obj" ? [inst.value] : []));
   },
 });
 
 export const objResolveErrorState = selector<ObjError[]>({
   key: "objResolvedError",
   get: ({ get }) => {
-    const instances = get(objResolveState);
-    return instances.flatMap((inst) => (inst.type === "error" ? [inst.value] : []));
+    const objs = get(objResolveState);
+    return objs.flatMap((inst) => (inst.type === "error" ? [inst.value] : []));
   },
 });

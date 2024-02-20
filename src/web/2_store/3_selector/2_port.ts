@@ -8,7 +8,7 @@ export const portsState = selector<Port[]>({
   get: ({ get }) => {
     const objs = get(objResolvedState);
     const objsPorts = objs.flatMap((obj) => {
-      if (obj.node === "Inst") {
+      if (obj.obj === "Inst") {
         return obj.pack.ports.map((port) => ({
           key: `${obj.name}/${port.name}`,
           object: obj.name,

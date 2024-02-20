@@ -28,33 +28,18 @@ export const useCanvasForeground = () => {
       }
     },
     onClick: (e: MouseEvent) => {
-      if (fsm.state === "Add") {
+      if (fsm.state === "AddNode") {
         createObj({
-          node: "Inst",
-          name: fsm.value.name,
-          mod_path: [fsm.value.mod.owner, fsm.value.mod.name, fsm.value.mod.version],
-          params: [],
+          ...fsm.value,
           pos: posRound(mousePosition),
           flip: false,
           width: 100, // TODO
         });
         setState({ state: "Default", value: {} });
       }
-      if (fsm.state === "AddPrim") {
-        // TODO
-        createObj({
-          node: "Io",
-          direct: "In",
-          name: fsm.value.name,
-          pos: posRound(mousePosition),
-          flip: false,
-          width: 100,
-        });
-        setState({ state: "Default", value: {} });
-      }
-      if (fsm.state === "Wireing") {
+      if (fsm.state === "AddWire") {
         const path = [...fsm.value.path, posRound(mousePosition)];
-        setState({ state: "Wireing", value: { ...fsm.value, path } });
+        setState({ state: "AddWire", value: { ...fsm.value, path } });
       }
     },
   };

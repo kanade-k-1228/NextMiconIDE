@@ -52,11 +52,16 @@ const ModItem: FC<{ pack: PackKey }> = ({ pack }) => {
   const [hover, setHover] = useState(false);
 
   // Calculate
-  const selected = fsm.state === "Add" && packEq(fsm.value.mod, pack);
+  const selected =
+    fsm.state === "AddNode" &&
+    fsm.value.obj === "Inst" &&
+    fsm.value.mod[0] === pack.owner &&
+    fsm.value.mod[1] === pack.name &&
+    fsm.value.mod[2] === pack.version;
   const _color = selected ? color.sel : hover ? color.hov : color._;
 
   // TODO: this is random value
-  const ready = pack.name.includes("O");
+  const ready = pack.name.includes("Out");
 
   return (
     <div style={{ ...css.colSubGrid, background: _color.bg, color: _color.text, cursor: "pointer" }}>
@@ -64,7 +69,15 @@ const ModItem: FC<{ pack: PackKey }> = ({ pack }) => {
       <div
         style={{ display: "flex", alignItems: "center" }}
         onClick={() => {
-          setState({ state: "Add", value: { mod: pack, name: getNewName(pack.name.toLocaleLowerCase()) } });
+          setState({
+            state: "AddNode",
+            value: {
+              obj: "Inst",
+              name: getNewName(pack.name.toLocaleLowerCase()),
+              mod: [pack.owner, pack.name, pack.version],
+              params: [],
+            },
+          });
         }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}

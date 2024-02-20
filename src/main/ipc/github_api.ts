@@ -20,7 +20,7 @@
 //   console.log("=== GitHub Test ===");
 //   console.log(await getRegistories());
 //   console.log(await getTree());
-//   console.log(await getGithubContent("NextMicon", "registory", "main", ["IO", "GPIO", "v0.0.0", "README.md"]));
+//   console.log(await getGithubContent("NextMicon", "registory", "main", ["InOut", "GPIO", "v0.0.0", "README.md"]));
 //   console.log(await getGithubContent("NextMicon", "NextMiconIDE", "main", ["src", "ipckey.ts"]));
 // };
 
@@ -44,7 +44,7 @@
 //   return (await Promise.all(ret)).flat(1);
 // };
 
-// const getPackage = async (registory = { owner: "NextMicon", repo: "registory" }, directory = ["IO"]) => {
+// const getPackage = async (registory = { owner: "NextMicon", repo: "registory" }, directory = ["InOut"]) => {
 //   await octokit.request(`GET /repos/{owner}/{repo}/git/blobs/{file_sha}`);
 // };
 
