@@ -65,12 +65,12 @@ export const PrimPane: FC = () => {
       <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
       <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
       <Reg txt={DOC["Reg"]} Icon={AccessTime} />
-      <Reg txt={DOC["Lut"]} Icon={FormatListNumbered} />
+      <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} />
       <Reg txt={DOC["Fsm"]} Icon={Share} />
       <Reg txt={DOC["Slice"]} Icon={DataArray} />
       <Reg txt={DOC["Concat"]} Icon={DataObject} />
       <Reg txt={DOC["Const"]} Icon={Percent} />
-      <Reg txt={DOC["Vmod"]} Icon={Memory} />
+      <VMod txt={DOC["Vmod"]} Icon={Memory} />
     </div>
   );
 };
@@ -180,6 +180,21 @@ const Reg: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   );
 };
 
+const Lut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Lut"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Lut", name: "Lut0", input: 4, output: 4 }}
+    />
+  );
+};
+
 const VMod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
   return (
@@ -190,7 +205,7 @@ const VMod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Reg", name: "reg0", type: "0" }}
+      selValue={{ obj: "VMod", name: "vmod0", port: [] }}
     />
   );
 };

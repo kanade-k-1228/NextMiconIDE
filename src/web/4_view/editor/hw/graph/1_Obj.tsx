@@ -4,7 +4,7 @@ import { Position, posAdd, posFlip } from "~/utils";
 import { Pack } from "~/web/1_type";
 import { ObjResolveExt, useColor } from "~/web/2_store";
 import { useObj } from "~/web/3_facade";
-import { LeftIcon, RightIcon } from "~/web/4_view/atom";
+import { ExclamationIcon, LeftIcon, QuestionIcon, RightIcon } from "~/web/4_view/atom";
 
 export const ObjView: FC<{ node: Obj<ObjViewExt & ObjResolveExt> }> = ({ node }) => {
   switch (node.obj) {
@@ -27,13 +27,13 @@ const MemView: FC<{ mem: Mem<ObjViewExt & ObjResolveExt> }> = ({ mem }) => {
   const { onClick, onMouseDown, selected } = useObj(mem);
   return (
     <ObjAtom
-      left_ports={mem.variant === "RO" ? [{ name: "out", direct: "out" }] : [{ name: "in", direct: "in" }]}
-      right_ports={[]}
       pos={mem.pos}
       flip={mem.flip}
-      name={mem.name}
-      port_name={false}
       width={mem.width}
+      port_name={false}
+      left_ports={mem.variant === "RO" ? [{ name: "out", direct: "out" }] : [{ name: "in", direct: "in" }]}
+      right_ports={[]}
+      name={mem.name}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
@@ -45,13 +45,13 @@ const IrqView: FC<{ irq: Irq<ObjViewExt & ObjResolveExt> }> = ({ irq }) => {
   const { onClick, onMouseDown, key, selected } = useObj(irq);
   return (
     <ObjAtom
-      left_ports={[{ name: "in", direct: "in" }]}
-      right_ports={[]}
       pos={irq.pos}
-      flip={false}
-      name={irq.name}
-      port_name={false}
+      flip={irq.flip}
       width={irq.width}
+      left_ports={[{ name: "in", direct: "in", icon: "!" }]}
+      right_ports={[]}
+      port_name={false}
+      name={irq.name}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
@@ -63,20 +63,20 @@ const PortView: FC<{ port: Port<ObjViewExt & ObjResolveExt> }> = ({ port }) => {
   const { onClick, onMouseDown, key, selected } = useObj(port);
   return (
     <ObjAtom
+      pos={port.pos}
+      flip={port.flip}
       left_ports={
         port.variant === "In"
           ? [{ name: "out", direct: "out" }]
           : port.variant === "Out"
             ? [{ name: "in", direct: "in" }]
             : [
-                { name: "iosel", direct: "in" },
+                { name: "iosel", direct: "in", icon: "?" },
                 { name: "in", direct: "in" },
                 { name: "out", direct: "out" },
               ]
       }
       right_ports={[]}
-      pos={port.pos}
-      flip={false}
       name={port.name}
       port_name={false}
       width={port.width}
@@ -136,45 +136,24 @@ const RegView: FC<{ reg: Reg<ObjViewExt & ObjResolveExt> }> = ({ reg }) => {
 };
 
 const InstView: FC<{ inst: Inst<ObjViewExt & ObjResolveExt> }> = ({ inst }) => {
-  // Global State
-  const { onClick, onMouseDown, key, selected } = useObj(inst);
-  const color = useColor().editor.hw.graph.obj;
-
-  // Local State
-  const [hover, setHover] = useState(false);
-
-  // Calculate
-  const [width, height] = inst.pack.size;
-  const [ox, oy] = inst.pos;
-  const ports = inst.pack.ports;
-  const tx = inst.pack.textX;
-  const highlight = selected ? selected : hover;
-
+  const { onClick, onMouseDown, selected } = useObj(inst);
   return (
-    <g
-      onMouseOver={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{ cursor: "pointer" }}
+    <ObjAtom
+      pos={inst.pos}
+      flip={inst.flip}
+      left_ports={inst.pack.ports
+        .filter((port) => port.pos[0] <= inst.width / 2)
+        .map((port) => ({ direct: port.direct === "input" ? "in" : "out", name: port.name }))}
+      right_ports={inst.pack.ports
+        .filter((port) => port.pos[0] > inst.width / 2)
+        .map((port) => ({ direct: port.direct === "input" ? "in" : "out", name: port.name }))}
+      name={inst.name}
+      port_name={true}
+      width={inst.pack.size[0]}
+      highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
-    >
-      <rect
-        x={ox - width / 2}
-        y={oy - height / 2}
-        width={width}
-        height={height}
-        stroke={highlight ? color.hov.border : color._.border}
-        strokeWidth={2}
-        rx={20}
-        fill={highlight ? color.hov.fill : color._.fill}
-      />
-      <text x={inst.flip ? ox - tx : ox + tx} y={oy} fontSize={25} textAnchor="middle" alignmentBaseline="middle">
-        {inst.name}
-      </text>
-      {ports.map((port) => (
-        <PortInfo key={port.name} port={port} origin={inst.pos} hover={highlight} flip={inst.flip ?? false} />
-      ))}
-    </g>
+    />
   );
 };
 
@@ -187,8 +166,8 @@ const getTextAlign = (lhs: number, rhs: number, flip: boolean) => {
 };
 
 const ObjAtom: FC<{
-  left_ports: { name: string; direct: "in" | "out" }[];
-  right_ports: { name: string; direct: "in" | "out" }[];
+  left_ports: { name: string; direct: "in" | "out"; icon?: PortIcon }[];
+  right_ports: { name: string; direct: "in" | "out"; icon?: PortIcon }[];
   name: string;
   pos: Position;
   flip: boolean;
@@ -245,7 +224,7 @@ const ObjAtom: FC<{
           {name}
         </text>
       )}
-      {lp.map(({ name, direct }, i, arr) => (
+      {lp.map(({ name, direct, icon }, i, arr) => (
         <ObjPort
           key={name}
           side="left"
@@ -253,9 +232,10 @@ const ObjAtom: FC<{
           direct={direct}
           pos={posAdd(pos, [-width / 2 + 17, (i - (arr.length - 1) / 2) * 40])}
           hov={hover}
+          icon={icon}
         />
       ))}
-      {rp.map(({ name, direct }, i, arr) => (
+      {rp.map(({ name, direct, icon }, i, arr) => (
         <ObjPort
           key={name}
           side="right"
@@ -263,31 +243,35 @@ const ObjAtom: FC<{
           direct={direct}
           pos={posAdd(pos, [width / 2 - 17, (i - (arr.length - 1) / 2) * 40])}
           hov={hover}
+          icon={icon}
         />
       ))}
     </g>
   );
 };
 
-const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "left" | "right"; hov: boolean }> = ({
+type PortIcon = "?" | "!" | ">" | "<";
+
+const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "left" | "right"; hov: boolean; icon?: PortIcon }> = ({
   name,
   pos,
   direct,
   side,
   hov,
+  icon,
 }) => {
   const TEXT_OFFSET = 17;
   const color = useColor().editor.hw.graph.obj;
   const [cx, cy] = pos;
   const _color = hov ? color.hov : color._;
+  const _icon: PortIcon = icon ?? ((direct === "in") === (side === "left") ? ">" : "<");
   return (
     <>
       <circle cx={cx} cy={cy} r={14} fill={_color.port_bg} />
-      {(direct === "in") === (side === "left") ? (
-        <RightIcon cx={cx} cy={cy} color={_color.port_icon} />
-      ) : (
-        <LeftIcon cx={cx} cy={cy} color={_color.port_icon} />
-      )}
+      {_icon === ">" && <RightIcon cx={cx} cy={cy} color={_color.port_icon} />}
+      {_icon === "<" && <LeftIcon cx={cx} cy={cy} color={_color.port_icon} />}
+      {_icon === "?" && <QuestionIcon cx={cx} cy={cy} color={_color.port_icon} />}
+      {_icon === "!" && <ExclamationIcon cx={cx} cy={cy} color={_color.port_icon} />}
       <text
         x={side === "left" ? cx + TEXT_OFFSET : cx - TEXT_OFFSET}
         y={cy}
