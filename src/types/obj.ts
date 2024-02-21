@@ -32,8 +32,8 @@ export type Port<Ext extends ObjExt = ObjExt> = { obj: "Port"; name: string; var
 export type Reg<Ext extends ObjExt = ObjExt> = { obj: "Reg"; name: string; type: string; init?: number } & Ext["Reg"];
 export type Lut<Ext extends ObjExt = ObjExt> = { obj: "Lut"; name: string; input: number; output: number } & Ext["Lut"];
 export type Fsm<Ext extends ObjExt = ObjExt> = { obj: "Fsm"; name: string; input: number; state: number } & Ext["Fsm"];
-export type Concat<Ext extends ObjExt = ObjExt> = { obj: "Concat"; name: string; input: string[]; out_width: number } & Ext["Concat"];
-export type Slice<Ext extends ObjExt = ObjExt> = { obj: "Slice"; name: string; input: string; range: [number, number] } & Ext["Slice"];
+export type Concat<Ext extends ObjExt = ObjExt> = { obj: "Concat"; name: string; input: number[] } & Ext["Concat"];
+export type Slice<Ext extends ObjExt = ObjExt> = { obj: "Slice"; name: string; range: [number, number] } & Ext["Slice"];
 export type Const<Ext extends ObjExt = ObjExt> = { obj: "Const"; name: string; width: number; value: number } & Ext["Const"];
 export type VMod<Ext extends ObjExt = ObjExt> = {
   obj: "VMod";

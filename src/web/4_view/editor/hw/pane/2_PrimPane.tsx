@@ -66,10 +66,10 @@ export const PrimPane: FC = () => {
       <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
       <Reg txt={DOC["Reg"]} Icon={AccessTime} />
       <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} />
-      <Reg txt={DOC["Fsm"]} Icon={Share} />
-      <Reg txt={DOC["Slice"]} Icon={DataArray} />
-      <Reg txt={DOC["Concat"]} Icon={DataObject} />
-      <Reg txt={DOC["Const"]} Icon={Percent} />
+      <Fsm txt={DOC["Fsm"]} Icon={Share} />
+      <Slice txt={DOC["Slice"]} Icon={DataArray} />
+      <Concat txt={DOC["Concat"]} Icon={DataObject} />
+      <Const txt={DOC["Const"]} Icon={Percent} />
       <VMod txt={DOC["Vmod"]} Icon={Memory} />
     </div>
   );
@@ -190,7 +190,67 @@ const Lut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Lut", name: "Lut0", input: 4, output: 4 }}
+      selValue={{ obj: "Lut", name: "lut0", input: 4, output: 4 }}
+    />
+  );
+};
+
+const Fsm: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Fsm"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Fsm", name: "fsm0", input: 4, state: 4 }}
+    />
+  );
+};
+
+const Slice: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Slice"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Slice", name: "slice0", range: [0, 0] }}
+    />
+  );
+};
+
+const Concat: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Concat"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Concat", name: "concat0", input: [8, 8] }}
+    />
+  );
+};
+
+const Const: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Const"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Const", name: "const0", value: 0, width: 8 }}
     />
   );
 };

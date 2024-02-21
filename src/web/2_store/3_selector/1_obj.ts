@@ -20,6 +20,11 @@ export type ObjResolveExt = {
   Irq: object;
   Port: object;
   Reg: object;
+  Lut: object;
+  Fsm: object;
+  Concat: object;
+  Slice: object;
+  Const: object;
   VMod: object;
 };
 
@@ -66,6 +71,21 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
           return { type: "obj", value: { ...obj, pos } };
         }
         case "Reg": {
+          return { type: "obj", value: { ...obj, pos } };
+        }
+        case "Lut": {
+          return { type: "obj", value: { ...obj, pos } };
+        }
+        case "Fsm": {
+          return { type: "obj", value: { ...obj, pos } };
+        }
+        case "Concat": {
+          return { type: "obj", value: { ...obj, pos } };
+        }
+        case "Slice": {
+          return { type: "obj", value: { ...obj, pos } };
+        }
+        case "Const": {
           return { type: "obj", value: { ...obj, pos } };
         }
         case "VMod": {
