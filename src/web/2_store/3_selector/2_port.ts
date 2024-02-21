@@ -3,40 +3,45 @@ import { posAdd, posFlip } from "~/utils";
 import { Port } from "~/web/1_type";
 import { objResolvedState } from "./1_obj";
 
+// n: num of pin
+// g: grid
+// n=1 [0]
+// n=2 [-g/2,g/2]
+// n=3 [-g,0,g]
+const getPinY = (i: number, n: number, g: number) => (-(n - 1) * g) / 2 + i * g;
+
 export const portsState = selector<Port[]>({
   key: "ports",
   get: ({ get }) => {
     const objs = get(objResolvedState);
-    const objsPorts = objs.flatMap((obj) => {
+    return objs.flatMap((obj) => {
       switch (obj.obj) {
         case "Inst":
-          return obj.pack.ports.map((port) => ({
-            key: `${obj.name}/${port.name}`,
-            object: obj.name,
-            name: port.name,
-            direct: port.direct,
-            width: port.width,
-            pos: posAdd(obj.pos, obj.flip ? posFlip(port.pos) : port.pos),
-          }));
         case "Mem":
-          return [
-            {
-              key: `${obj.name}/out`,
-              object: obj.name,
-              name: "out",
-              direct: "output",
-              width: 1,
-              pos: posAdd(obj.pos, obj.flip ? [obj.width / 2, 0] : [-obj.width / 2, 0]),
-            },
-          ];
         case "Irq":
-          return [];
         case "Port":
-          return [];
         case "Reg":
+          return [
+            ...obj.left_ports.map((port, i, arr) => ({
+              key: `${obj.name}/${port.name}`,
+              object: obj.name,
+              name: port.name,
+              direct: port.direct,
+              width: port.width,
+              pos: posAdd(obj.pos, [((obj.flip ? 1 : -1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
+            })),
+            ...obj.right_ports.map((port, i, arr) => ({
+              key: `${obj.name}/${port.name}`,
+              object: obj.name,
+              name: port.name,
+              direct: port.direct,
+              width: port.width,
+              pos: posAdd(obj.pos, [((obj.flip ? -1 : 1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
+            })),
+          ];
+        default:
           return [];
       }
-    }) as Port[];
-    return objsPorts;
+    });
   },
 });

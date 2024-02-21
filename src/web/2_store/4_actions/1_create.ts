@@ -57,8 +57,8 @@ const validateNewWire = (project: Project, newWire: Wire, ports: Port[]) => {
   if (toPort === undefined) throw `Undefined port: ${newWire.last}`;
 
   // Check Type of Connection
-  if (fromPort.direct !== "output") throw `Invalid wire direction`;
-  if (toPort.direct !== "input") throw `Invalid wire directon`;
+  if (fromPort.direct !== "out") throw `Invalid wire direction`;
+  if (toPort.direct !== "in") throw `Invalid wire directon`;
   if (fromPort.width !== toPort.width) throw `Invalid wire width`;
 
   // Remove multiple drived port

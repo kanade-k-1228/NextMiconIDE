@@ -1,15 +1,21 @@
 import {
   AccessTime,
+  Add,
   Code,
   DataArray,
   DataObject,
   FormatListNumbered,
+  JoinFull,
+  JoinFullOutlined,
+  JoinInner,
   KeyboardArrowLeft,
   KeyboardArrowRight,
   Memory,
   Numbers,
   Percent,
   PriorityHigh,
+  QuestionAnswer,
+  QuestionMark,
   Share,
   SvgIconComponent,
 } from "@mui/icons-material";
@@ -34,6 +40,10 @@ const DOC_JA = {
   Slice: "配線の分割",
   Concat: "配線の連結",
   Const: "定数値",
+  Mux: "マルチプレクサ",
+  Demux: "デマルチプレクサ",
+  Bit: "ビット演算",
+  Arith: "算術演算",
   Vmod: "Verilogモジュール",
 };
 const DOC_EN = {
@@ -64,13 +74,17 @@ export const PrimPane: FC = () => {
       <Irq txt={DOC["Irq"]} Icon={PriorityHigh} />
       <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
       <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
-      <Reg txt={DOC["Reg"]} Icon={AccessTime} />
-      <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} />
-      <Fsm txt={DOC["Fsm"]} Icon={Share} />
-      <Slice txt={DOC["Slice"]} Icon={DataArray} />
-      <Concat txt={DOC["Concat"]} Icon={DataObject} />
-      <Const txt={DOC["Const"]} Icon={Percent} />
-      <VMod txt={DOC["Vmod"]} Icon={Memory} />
+      {/* <Reg txt={DOC["Reg"]} Icon={AccessTime} /> */}
+      {/* <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} /> */}
+      {/* <Fsm txt={DOC["Fsm"]} Icon={Share} /> */}
+      {/* <Slice txt={DOC["Slice"]} Icon={DataArray} /> */}
+      {/* <Concat txt={DOC["Concat"]} Icon={DataObject} /> */}
+      {/* <Const txt={DOC["Const"]} Icon={Percent} /> */}
+      {/* <Vmod txt={DOC["Bit"]} Icon={JoinInner} /> */}
+      {/* <Vmod txt={DOC["Arith"]} Icon={Add} /> */}
+      {/* <Vmod txt={DOC["Mux"]} Icon={QuestionMark} /> */}
+      {/* <Vmod txt={DOC["Demux"]} Icon={QuestionMark} /> */}
+      <Vmod txt={DOC["Vmod"]} Icon={Memory} />
     </div>
   );
 };
@@ -255,17 +269,17 @@ const Const: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   );
 };
 
-const VMod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+const Vmod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
   return (
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "VMod"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Vmod"}
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "VMod", name: "vmod0", port: [] }}
+      selValue={{ obj: "Vmod", name: "vmod0", port: [], body: "" }}
     />
   );
 };
@@ -298,8 +312,18 @@ const PrimSelect: FC<{
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={() => {
-        if (nameSel.type === "input" && name !== "") setState({ state: "AddNode", value: selValue });
-        else setState({ state: "AddNode", value: selValue });
+        switch (nameSel.type) {
+          case "list":
+          case "input": {
+            if (name !== "") {
+              setState({ state: "AddNode", value: selValue });
+            }
+            return;
+          }
+          case "none":
+            setState({ state: "AddNode", value: selValue });
+            return;
+        }
       }}
     >
       <Center>

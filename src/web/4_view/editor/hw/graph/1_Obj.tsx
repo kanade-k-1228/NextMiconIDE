@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Inst, Irq, Mem, Obj, ObjViewExt, Port, Reg } from "~/types";
+import { Inst, Irq, Mem, Obj, ObjViewExt, Port, Reg, Vmod } from "~/types";
 import { Position, posAdd, posFlip } from "~/utils";
 import { Pack } from "~/web/1_type";
 import { ObjResolveExt, useColor } from "~/web/2_store";
@@ -18,6 +18,8 @@ export const ObjView: FC<{ node: Obj<ObjViewExt & ObjResolveExt> }> = ({ node })
       return <PortView port={node} />;
     case "Reg":
       return <RegView reg={node} />;
+    default:
+      return <></>;
   }
 };
 
@@ -31,8 +33,8 @@ const MemView: FC<{ mem: Mem<ObjViewExt & ObjResolveExt> }> = ({ mem }) => {
       flip={mem.flip}
       width={mem.width}
       port_name={false}
-      left_ports={mem.variant === "RO" ? [{ name: "out", direct: "out" }] : [{ name: "in", direct: "in" }]}
-      right_ports={[]}
+      left_ports={mem.left_ports}
+      right_ports={mem.right_ports}
       name={mem.name}
       highlight={selected}
       onClick={onClick}
@@ -141,15 +143,29 @@ const InstView: FC<{ inst: Inst<ObjViewExt & ObjResolveExt> }> = ({ inst }) => {
     <ObjAtom
       pos={inst.pos}
       flip={inst.flip}
-      left_ports={inst.pack.ports
-        .filter((port) => port.pos[0] <= inst.width / 2)
-        .map((port) => ({ direct: port.direct === "input" ? "in" : "out", name: port.name }))}
-      right_ports={inst.pack.ports
-        .filter((port) => port.pos[0] > inst.width / 2)
-        .map((port) => ({ direct: port.direct === "input" ? "in" : "out", name: port.name }))}
+      left_ports={inst.left_ports}
+      right_ports={inst.right_ports}
       name={inst.name}
       port_name={true}
-      width={inst.pack.size[0]}
+      width={inst.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
+  );
+};
+
+const VmodView: FC<{ vmod: Vmod<ObjViewExt & ObjResolveExt> }> = ({ vmod }) => {
+  const { onClick, onMouseDown, selected } = useObj(vmod);
+  return (
+    <ObjAtom
+      pos={vmod.pos}
+      flip={vmod.flip}
+      left_ports={vmod.left_ports}
+      right_ports={vmod.right_ports}
+      name={vmod.name}
+      port_name={true}
+      width={vmod.width}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
@@ -280,24 +296,6 @@ const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "le
         alignmentBaseline="middle"
       >
         {name}
-      </text>
-    </>
-  );
-};
-
-const PortInfo: FC<{ port: Pack["ports"][number]; origin: Position; hover: boolean; flip: boolean }> = ({ port, origin, hover, flip }) => {
-  const textOffset = 35;
-  const side = port.pos[0] > 0 !== flip;
-  const color = useColor().editor.hw.graph.obj;
-  const [x, y] = posAdd(origin, flip ? posFlip(port.pos) : port.pos);
-  const io = port.direct === "input";
-  const [cx, cy] = side ? [x - 18, y] : [x + 18, y];
-  return (
-    <>
-      <circle cx={cx} cy={cy} r={14} fill={hover ? color.hov.port_bg : color._.port_bg} />
-      {side === io ? <LeftIcon cx={cx} cy={cy} color={color._.port_icon} /> : <RightIcon cx={cx} cy={cy} color={color._.port_icon} />}
-      <text x={side ? x - textOffset : x + textOffset} y={y} fontSize={18} textAnchor={side ? "end" : "start"} alignmentBaseline="middle">
-        {port.name}
       </text>
     </>
   );

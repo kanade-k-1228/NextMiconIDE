@@ -52,7 +52,7 @@ const objRangeSelect = (objs: Obj<ObjViewExt & ObjResolveExt>[], rect: Rect): Ob
   return objs
     .filter((obj) => {
       if (obj.obj === "Inst") {
-        return corrision({ x: obj.pos[0], y: obj.pos[1], width: obj.pack.size[0], height: obj.pack.size[1] }, rect);
+        return corrision({ x: obj.pos[0], y: obj.pos[1], width: obj.width, height: 20 }, rect); // TODO: height
       }
     })
     .map(({ name }) => name);

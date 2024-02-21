@@ -1,4 +1,5 @@
 import { selector } from "recoil";
+import { Port } from "~/files";
 import { Obj, ObjViewExt } from "~/types";
 import { posAdd, posRound, posSub } from "~/utils";
 import { Pack, getObjKey, packToString } from "~/web/1_type";
@@ -15,17 +16,20 @@ import {
 type ObjError = string;
 
 export type ObjResolveExt = {
-  Inst: { pack: Pack; addr?: number };
-  Mem: { ports: {} };
-  Irq: object;
-  Port: object;
-  Reg: object;
+  Inst: { pack: Pack; addr?: number; left_ports: Port[]; right_ports: Port[] };
+  Mem: { addr: number; left_ports: Port[]; right_ports: Port[] };
+  Irq: { left_ports: Port[]; right_ports: Port[] };
+  Port: { left_ports: Port[]; right_ports: Port[] };
+  Reg: { left_ports: Port[]; right_ports: Port[] };
   Lut: object;
   Fsm: object;
   Concat: object;
   Slice: object;
   Const: object;
-  VMod: object;
+  Mux: object;
+  Demux: object;
+  Opr: object;
+  Vmod: { left_ports: Port[]; right_ports: Port[] };
 };
 
 const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjResolveExt> } | { type: "error"; value: ObjError })[]>({
@@ -39,6 +43,7 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
     const selectedObjects = get(selectedObjectsState);
 
     let addrAcc = Math.ceil(board.addr.reserved / board.addr.pageSize);
+
     return project.objs.map((obj) => {
       // Resolve Position if moving
       let pos = obj.pos;
@@ -59,19 +64,93 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
             addr = addrAcc;
             addrAcc += Math.ceil(pack.software.memSize / board.addr.pageSize);
           }
-          return { type: "obj", value: { ...obj, pack, addr, pos } };
+          return {
+            type: "obj",
+            value: {
+              ...obj,
+              pack,
+              addr,
+              pos,
+              left_ports: pack.ports.filter((port) => port.side === "left"),
+              right_ports: pack.ports.filter((port) => port.side === "right"),
+            },
+          };
         }
         case "Mem": {
-          return { type: "obj", value: { ...obj, pos, ports: {} } };
+          // Resolve Address
+          let addr: number | undefined = undefined;
+          addr = addrAcc;
+          addrAcc += Math.ceil(obj.byte / board.addr.pageSize);
+
+          switch (obj.variant) {
+            case "RW":
+              return {
+                type: "obj",
+                value: {
+                  ...obj,
+                  pos,
+                  addr,
+                  left_ports: [{ name: "out", type: "u8", width: 1, direct: "out" }],
+                  right_ports: [],
+                },
+              };
+            case "RO":
+              return {
+                type: "obj",
+                value: {
+                  ...obj,
+                  pos,
+                  addr,
+                  left_ports: [{ name: "in", type: "u8", width: 1, direct: "in" }],
+                  right_ports: [],
+                },
+              };
+          }
         }
         case "Irq": {
-          return { type: "obj", value: { ...obj, pos } };
+          return {
+            type: "obj",
+            value: { ...obj, pos, left_ports: [{ name: "in", type: "wire", width: 1, direct: "in" }], right_ports: [] },
+          };
         }
         case "Port": {
-          return { type: "obj", value: { ...obj, pos } };
+          switch (obj.variant) {
+            case "In":
+              return {
+                type: "obj",
+                value: { ...obj, pos, left_ports: [{ name: "out", type: "wire", width: 1, direct: "out" }], right_ports: [] },
+              };
+            case "Out":
+              return {
+                type: "obj",
+                value: { ...obj, pos, left_ports: [{ name: "in", type: "wire", width: 1, direct: "in" }], right_ports: [] },
+              };
+            case "InOut":
+              return {
+                type: "obj",
+                value: {
+                  ...obj,
+                  pos,
+                  left_ports: [
+                    { name: "iosel", type: "wire", width: 1, direct: "in" },
+                    { name: "out", type: "wire", width: 1, direct: "in" },
+                    { name: "in", type: "wire", width: 1, direct: "out" },
+                  ],
+                  right_ports: [],
+                },
+              };
+          }
         }
         case "Reg": {
-          return { type: "obj", value: { ...obj, pos } };
+          return {
+            type: "obj",
+            value: {
+              ...obj,
+              pos,
+              left_ports: [{ name: "in", type: "wire", width: 1, direct: "in" }],
+              right_ports: [{ name: "out", type: "wire", width: 1, direct: "out" }],
+            },
+          };
         }
         case "Lut": {
           return { type: "obj", value: { ...obj, pos } };
@@ -88,8 +167,17 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
         case "Const": {
           return { type: "obj", value: { ...obj, pos } };
         }
-        case "VMod": {
-          return { type: "obj", value: { ...obj, pos, ports: [] } };
+        case "Mux": {
+          return { type: "obj", value: { ...obj, pos } };
+        }
+        case "Demux": {
+          return { type: "obj", value: { ...obj, pos } };
+        }
+        case "Vmod": {
+          return {
+            type: "obj",
+            value: { ...obj, pos, left_ports: [{ name: "clk", type: "wire", width: 1, direct: "in" }], right_ports: [] },
+          };
         }
       }
     });

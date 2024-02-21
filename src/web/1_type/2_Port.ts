@@ -4,7 +4,7 @@ export interface Port {
   key: string;
   object: string;
   name: string;
-  direct: "input" | "output" | "inout";
+  direct: "in" | "out";
   width: number;
   pos: Position;
 }

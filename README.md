@@ -15,3 +15,10 @@
   - [x] iCE40LP8k-TinyFPGA_BX-PicoRV32-SRAM
   - [ ] GW1NR9-TangNano9K-VexRiscv-Wishbone
   - [ ] Zynq7010-ZYBOZ710-ArmCoretexA9-AXILite
+- 演算子
+  - 算術 `+ - * / % **`
+  - ビット `~ & | ^ ~^`
+  - リダクション `& ~& | ~| ^ ~^`
+  - 論理 `! && ||`
+  - 比較 `== != < <= > >=`
+  - シフト `<< >> <<< >>>`

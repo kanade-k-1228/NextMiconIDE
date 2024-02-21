@@ -1,25 +1,21 @@
 export interface Package {
-  ports: {
-    name: string;
-    direct: "input" | "output" | "inout";
-    width: number;
-    pos: [number, number];
-  }[];
-
-  params: {
-    name: string;
-    valid: ({ type: "num"; num: number } | { type: "range"; from: number; to: number } | { type: "enum"; num: number; str: string })[];
-  }[];
-
-  size: [number, number];
-  textX: number;
-
+  ports: (Port & PortSideExt)[];
+  params: { name: string; type: string }[];
   software?: {
     className: string;
     memSize: number;
     methods: ({ note: string } & Func)[];
   };
 }
+
+export type Port = {
+  name: string;
+  type: string;
+  width: number;
+  direct: "in" | "out";
+};
+
+export type PortSideExt = { side: "left" | "right" };
 
 export interface Func {
   type: string;
