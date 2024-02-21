@@ -16,13 +16,14 @@ type ObjError = string;
 
 export type ObjResolveExt = {
   Inst: { pack: Pack; addr?: number };
-  Mem: object;
+  Mem: { ports: {} };
   Irq: object;
-  Io: object;
+  Port: object;
   Reg: object;
-} & ObjViewExt;
+  VMod: object;
+};
 
-const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | { type: "error"; value: ObjError })[]>({
+const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjResolveExt> } | { type: "error"; value: ObjError })[]>({
   key: "objResolve",
   get: ({ get }) => {
     const project = get(projectState);
@@ -53,11 +54,10 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | {
             addr = addrAcc;
             addrAcc += Math.ceil(pack.software.memSize / board.addr.pageSize);
           }
-          const ret: Obj<ObjResolveExt> = { ...obj, pack, addr, pos };
-          return { type: "obj", value: ret };
+          return { type: "obj", value: { ...obj, pack, addr, pos } };
         }
         case "Mem": {
-          return { type: "obj", value: { ...obj, pos } };
+          return { type: "obj", value: { ...obj, pos, ports: {} } };
         }
         case "Irq": {
           return { type: "obj", value: { ...obj, pos } };
@@ -68,12 +68,15 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjResolveExt> } | {
         case "Reg": {
           return { type: "obj", value: { ...obj, pos } };
         }
+        case "VMod": {
+          return { type: "obj", value: { ...obj, pos, ports: [] } };
+        }
       }
     });
   },
 });
 
-export const objResolvedState = selector<Obj<ObjResolveExt>[]>({
+export const objResolvedState = selector<Obj<ObjViewExt & ObjResolveExt>[]>({
   key: "objResolved",
   get: ({ get }) => {
     const objs = get(objResolveState);

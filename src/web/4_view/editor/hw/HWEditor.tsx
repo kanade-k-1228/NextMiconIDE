@@ -3,10 +3,10 @@ import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { hweditorSizesState, paneState, useColor } from "~/web/2_store";
 import { useHWEditorFacade } from "~/web/3_facade";
-import { MiconEditor } from "./graph/MiconEditor";
 import { css } from "../../atom";
+import { MiconEditor } from "./graph/MiconEditor";
+import { InfoPane, ModPane, PrimPane } from "./pane";
 import { EditorToolBar, PaneTabBar } from "./toolbar/ButtonBar";
-import { InfoPane, PrimPane, ModPane } from "./pane";
 
 export const HWEditor = () => {
   const { keyboard } = useHWEditorFacade();

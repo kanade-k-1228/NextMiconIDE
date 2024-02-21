@@ -26,7 +26,7 @@ export const portsState = selector<Port[]>({
               name: "out",
               direct: "output",
               width: 1,
-              pos: posAdd(obj.pos, obj.flip ? posFlip([obj.width / 2, 0]) : [obj.width / 2, 0]),
+              pos: posAdd(obj.pos, obj.flip ? [obj.width / 2, 0] : [-obj.width / 2, 0]),
             },
           ];
         case "Irq":

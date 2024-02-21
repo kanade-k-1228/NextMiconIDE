@@ -4,15 +4,22 @@ export interface ObjExt {
   Irq: object;
   Port: object;
   Reg: object;
+  VMod: object;
 }
 
-export type Obj<Ext extends ObjExt = ObjExt> = Inst<Ext> | Mem<Ext> | Irq<Ext> | Port<Ext> | Reg<Ext>;
+export type Obj<Ext extends ObjExt = ObjExt> = Inst<Ext> | Mem<Ext> | Irq<Ext> | Port<Ext> | Reg<Ext> | VMod<Ext>;
 
 export type Inst<Ext extends ObjExt = ObjExt> = { obj: "Inst"; name: string; mod: string[]; params: Params } & Ext["Inst"];
 export type Mem<Ext extends ObjExt = ObjExt> = { obj: "Mem"; name: string; variant: "RW" | "RO"; byte: number } & Ext["Mem"];
 export type Irq<Ext extends ObjExt = ObjExt> = { obj: "Irq"; name: string; sw_stmts: string[] } & Ext["Irq"];
 export type Port<Ext extends ObjExt = ObjExt> = { obj: "Port"; name: string; variant: "In" | "Out" | "InOut" } & Ext["Port"];
 export type Reg<Ext extends ObjExt = ObjExt> = { obj: "Reg"; name: string; type: string; init?: number } & Ext["Reg"];
+export type VMod<Ext extends ObjExt = ObjExt> = {
+  obj: "VMod";
+  name: string;
+  port: { name: string; direct: "In" | "Out" | "InOut"; width: number }[];
+} & Ext["VMod"];
+
 type Params = { name: string; value: string }[];
 
 // --------------------------------------------------------------------------------
@@ -30,4 +37,5 @@ export interface ObjViewExt {
   Irq: ObjView;
   Port: ObjView;
   Reg: ObjView;
+  VMod: ObjView;
 }

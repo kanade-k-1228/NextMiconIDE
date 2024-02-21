@@ -15,9 +15,9 @@ import {
 } from "@mui/icons-material";
 import { FC, useState } from "react";
 import { useRecoilState } from "recoil";
+import { Obj } from "~/types";
 import { States, hwEditorFSM, useColor } from "~/web/2_store";
 import { Center, css } from "~/web/4_view/atom";
-import { Obj } from "~/types";
 
 // Primitive Elements
 
@@ -172,6 +172,21 @@ const Reg: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       txt={txt}
       Icon={Icon}
       isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Reg"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Reg", name: "reg0", type: "0" }}
+    />
+  );
+};
+
+const VMod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "VMod"}
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}

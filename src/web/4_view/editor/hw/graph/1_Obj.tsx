@@ -1,12 +1,12 @@
 import { FC, useState } from "react";
-import { Inst, Irq, Mem, Obj, Port, Reg } from "~/types";
+import { Inst, Irq, Mem, Obj, ObjViewExt, Port, Reg } from "~/types";
 import { Position, posAdd, posFlip } from "~/utils";
 import { Pack } from "~/web/1_type";
 import { ObjResolveExt, useColor } from "~/web/2_store";
 import { useObj } from "~/web/3_facade";
 import { LeftIcon, RightIcon } from "~/web/4_view/atom";
 
-export const ObjView: FC<{ node: Obj<ObjResolveExt> }> = ({ node }) => {
+export const ObjView: FC<{ node: Obj<ObjViewExt & ObjResolveExt> }> = ({ node }) => {
   switch (node.obj) {
     case "Inst":
       return <InstView inst={node} />;
@@ -23,15 +23,14 @@ export const ObjView: FC<{ node: Obj<ObjResolveExt> }> = ({ node }) => {
 
 // --------------------------------------------------------------------------------
 
-const MemView: FC<{ mem: Mem<ObjResolveExt> }> = ({ mem }) => {
+const MemView: FC<{ mem: Mem<ObjViewExt & ObjResolveExt> }> = ({ mem }) => {
   const { onClick, onMouseDown, selected } = useObj(mem);
-
   return (
     <ObjAtom
       left_ports={mem.variant === "RO" ? [{ name: "out", direct: "out" }] : [{ name: "in", direct: "in" }]}
       right_ports={[]}
       pos={mem.pos}
-      flip={false}
+      flip={mem.flip}
       name={mem.name}
       port_name={false}
       width={mem.width}
@@ -42,7 +41,7 @@ const MemView: FC<{ mem: Mem<ObjResolveExt> }> = ({ mem }) => {
   );
 };
 
-const IrqView: FC<{ irq: Irq<ObjResolveExt> }> = ({ irq }) => {
+const IrqView: FC<{ irq: Irq<ObjViewExt & ObjResolveExt> }> = ({ irq }) => {
   const { onClick, onMouseDown, key, selected } = useObj(irq);
   return (
     <ObjAtom
@@ -60,7 +59,7 @@ const IrqView: FC<{ irq: Irq<ObjResolveExt> }> = ({ irq }) => {
   );
 };
 
-const PortView: FC<{ port: Port<ObjResolveExt> }> = ({ port }) => {
+const PortView: FC<{ port: Port<ObjViewExt & ObjResolveExt> }> = ({ port }) => {
   const { onClick, onMouseDown, key, selected } = useObj(port);
   return (
     <ObjAtom
@@ -88,7 +87,7 @@ const PortView: FC<{ port: Port<ObjResolveExt> }> = ({ port }) => {
   );
 };
 
-const RegView: FC<{ reg: Reg<ObjResolveExt> }> = ({ reg }) => {
+const RegView: FC<{ reg: Reg<ObjViewExt & ObjResolveExt> }> = ({ reg }) => {
   // Global State
   const { onClick, onMouseDown, key, selected } = useObj(reg);
   const color = useColor().editor.hw.graph.obj;
@@ -118,6 +117,7 @@ const RegView: FC<{ reg: Reg<ObjResolveExt> }> = ({ reg }) => {
       <rect
         x={ox}
         y={oy}
+        rx={5}
         width={width}
         height={height}
         stroke={highlight ? color.hov.border : color._.border}
@@ -128,13 +128,14 @@ const RegView: FC<{ reg: Reg<ObjResolveExt> }> = ({ reg }) => {
         stroke={highlight ? color._.fill : color._.border}
         points={CLOCK.map(([x, y]) => `${ox + x},${oy + y}`).join(" ")}
         fill="none"
+        strokeLinejoin="round"
         strokeWidth={3}
       />
     </g>
   );
 };
 
-const InstView: FC<{ inst: Inst<ObjResolveExt> }> = ({ inst }) => {
+const InstView: FC<{ inst: Inst<ObjViewExt & ObjResolveExt> }> = ({ inst }) => {
   // Global State
   const { onClick, onMouseDown, key, selected } = useObj(inst);
   const color = useColor().editor.hw.graph.obj;
@@ -179,9 +180,9 @@ const InstView: FC<{ inst: Inst<ObjResolveExt> }> = ({ inst }) => {
 
 // --------------------------------------------------------------------------------
 
-const getTextStyle = (lhs: number, rhs: number) => {
-  if (lhs === 0 && rhs > 0) return "left";
-  if (lhs > 0 && rhs === 0) return "right";
+const getTextAlign = (lhs: number, rhs: number, flip: boolean) => {
+  if (lhs === 0 && rhs > 0) return flip ? "right" : "left";
+  if (lhs > 0 && rhs === 0) return flip ? "left" : "right";
   return "center";
 };
 
@@ -196,7 +197,7 @@ const ObjAtom: FC<{
   highlight: boolean;
   onClick: (_: any) => any;
   onMouseDown: (_: any) => any;
-}> = ({ left_ports, right_ports, name, pos, port_name, width, highlight, onClick, onMouseDown }) => {
+}> = ({ left_ports, right_ports, name, pos, flip, port_name, width, highlight, onClick, onMouseDown }) => {
   // Global State
   const color = useColor().editor.hw.graph.obj;
 
@@ -205,9 +206,11 @@ const ObjAtom: FC<{
 
   // Calculate
   const height = Math.max(left_ports.length, right_ports.length) * 40 - 6;
-  const text_style = getTextStyle(left_ports.length, right_ports.length);
+  const text_align = getTextAlign(left_ports.length, right_ports.length, flip);
   const [ox, oy] = pos;
   const _color = highlight || hover ? color.hov : color._;
+  const lp = flip ? right_ports : left_ports;
+  const rp = flip ? left_ports : right_ports;
 
   return (
     <g
@@ -227,23 +230,24 @@ const ObjAtom: FC<{
         rx={17}
         fill={_color.fill}
       />
-      {text_style === "center" && (
+      {text_align === "center" && (
         <text x={ox} y={oy} fontSize={25} textAnchor="middle" alignmentBaseline="middle">
           {name}
         </text>
       )}
-      {text_style === "right" && (
+      {text_align === "right" && (
         <text x={ox + width / 2 - 20} y={oy} fontSize={25} textAnchor="end" alignmentBaseline="middle">
           {name}
         </text>
       )}
-      {text_style === "left" && (
+      {text_align === "left" && (
         <text x={ox - width / 2 + 20} y={oy} fontSize={25} textAnchor="start" alignmentBaseline="middle">
           {name}
         </text>
       )}
-      {left_ports.map(({ name, direct }, i, arr) => (
+      {lp.map(({ name, direct }, i, arr) => (
         <ObjPort
+          key={name}
           side="left"
           name={port_name ? name : ""}
           direct={direct}
@@ -251,8 +255,9 @@ const ObjAtom: FC<{
           hov={hover}
         />
       ))}
-      {right_ports.map(({ name, direct }, i, arr) => (
+      {rp.map(({ name, direct }, i, arr) => (
         <ObjPort
+          key={name}
           side="right"
           name={port_name ? name : ""}
           direct={direct}
