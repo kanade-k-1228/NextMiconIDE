@@ -2,10 +2,7 @@ import { GRID } from "~/consts";
 
 export type Position = [number, number];
 
-export const posRound = (pos: Position, scale = GRID): Position => [
-  Math.round(pos[0] / scale) * scale,
-  Math.round(pos[1] / scale) * scale,
-];
+export const posRound = (pos: Position, scale = GRID): Position => [Math.round(pos[0] / scale) * scale, Math.round(pos[1] / scale) * scale];
 
 export const posAdd = (lhs: Position, rhs: Position): Position => [lhs[0] + rhs[0], lhs[1] + rhs[1]];
 export const posSub = (lhs: Position, rhs: Position): Position => [lhs[0] - rhs[0], lhs[1] - rhs[1]];

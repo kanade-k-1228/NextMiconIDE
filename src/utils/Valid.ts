@@ -1,7 +1,4 @@
-export type Valid =
-  | { type: "num"; num: number }
-  | { type: "range"; from: number; to: number }
-  | { type: "enum"; num: number; str: string };
+export type Valid = { type: "num"; num: number } | { type: "range"; from: number; to: number } | { type: "enum"; num: number; str: string };
 
 const validateSingle = (rule: Valid, value: string | number): number | undefined => {
   if (rule.type === "num") {

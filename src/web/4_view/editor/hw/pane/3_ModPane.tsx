@@ -9,11 +9,11 @@ export const ModPane: FC<{ style?: CSSProperties }> = ({ style }) => {
   const [keyword, setKeyword] = useState("");
   const color = useColor().editor.hw.pane;
   return (
-    <div style={{ ...css.rowGrid({ row: ["48px", "1fr"] }), background: color._.bg, userSelect: "none", ...style }}>
+    <div style={{ ...css.rowGrid({ row: [48, null] }), background: color._.bg, userSelect: "none", ...style }}>
       <SearchBox
         text={keyword}
         setText={setKeyword}
-        // TODO
+        // TODO: Search package
         onSubmit={() => console.warn("Search Package:", keyword)}
         iconColor={color._.bg}
         inputColor={"white"}

@@ -21,6 +21,8 @@ export const portsState = selector<Port[]>({
         case "Irq":
         case "Port":
         case "Reg":
+        case "Const":
+        case "Vmod":
           return [
             ...obj.left_ports.map((port, i, arr) => ({
               key: `${obj.name}/${port.name}`,

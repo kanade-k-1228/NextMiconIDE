@@ -16,7 +16,7 @@ export const MiconEditor: FC<{}> = () => {
   return (
     <Canvas>
       {fsm.state === "Selecting" && <SelectRect start={fsm.value.start} />}
-      {objs?.map((obj, i) => <ObjView key={i} node={obj} />)}
+      {objs?.map((obj, i) => <ObjView key={i} obj={obj} />)}
       {fsm.state === "AddWire" && <ConnectingWire path={[fsm.value.startPos, ...fsm.value.path]} />}
       {wires?.map((wire, i) => <WireComponent key={i} wire={wire} />)}
       {ports?.map((port) => <PortComponent key={port.key} port={port} />)}

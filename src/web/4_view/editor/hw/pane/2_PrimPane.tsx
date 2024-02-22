@@ -74,12 +74,12 @@ export const PrimPane: FC = () => {
       <Irq txt={DOC["Irq"]} Icon={PriorityHigh} />
       <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
       <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
-      {/* <Reg txt={DOC["Reg"]} Icon={AccessTime} /> */}
+      <Reg txt={DOC["Reg"]} Icon={AccessTime} />
       {/* <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} /> */}
       {/* <Fsm txt={DOC["Fsm"]} Icon={Share} /> */}
-      {/* <Slice txt={DOC["Slice"]} Icon={DataArray} /> */}
-      {/* <Concat txt={DOC["Concat"]} Icon={DataObject} /> */}
-      {/* <Const txt={DOC["Const"]} Icon={Percent} /> */}
+      <Slice txt={DOC["Slice"]} Icon={DataArray} />
+      <Concat txt={DOC["Concat"]} Icon={DataObject} />
+      <Const txt={DOC["Const"]} Icon={Percent} />
       {/* <Vmod txt={DOC["Bit"]} Icon={JoinInner} /> */}
       {/* <Vmod txt={DOC["Arith"]} Icon={Add} /> */}
       {/* <Vmod txt={DOC["Mux"]} Icon={QuestionMark} /> */}

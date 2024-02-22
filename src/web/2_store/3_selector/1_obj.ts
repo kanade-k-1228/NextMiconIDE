@@ -25,7 +25,7 @@ export type ObjResolveExt = {
   Fsm: object;
   Concat: object;
   Slice: object;
-  Const: object;
+  Const: { left_ports: Port[]; right_ports: Port[] };
   Mux: object;
   Demux: object;
   Opr: object;
@@ -165,7 +165,15 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
           return { type: "obj", value: { ...obj, pos } };
         }
         case "Const": {
-          return { type: "obj", value: { ...obj, pos } };
+          return {
+            type: "obj",
+            value: {
+              ...obj,
+              pos,
+              left_ports: [],
+              right_ports: [{ name: "out", type: "wire", width: 8, direct: "out" }],
+            },
+          };
         }
         case "Mux": {
           return { type: "obj", value: { ...obj, pos } };
