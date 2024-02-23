@@ -65,7 +65,6 @@ const DOC = DOC_JA;
 
 export const PrimPane: FC = () => {
   const color = useColor().editor.hw.pane._;
-
   return (
     <div style={{ ...css.colGrid({ column: [40, "auto", null], row: 40 }), overflowY: "scroll", background: color.bg, color: color.text }}>
       <PortIn txt={DOC["In"]} Icon={KeyboardArrowLeft} />
@@ -75,15 +74,15 @@ export const PrimPane: FC = () => {
       <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
       <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
       <Reg txt={DOC["Reg"]} Icon={AccessTime} />
-      {/* <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} /> */}
-      {/* <Fsm txt={DOC["Fsm"]} Icon={Share} /> */}
+      <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} />
+      <Fsm txt={DOC["Fsm"]} Icon={Share} />
       <Slice txt={DOC["Slice"]} Icon={DataArray} />
       <Concat txt={DOC["Concat"]} Icon={DataObject} />
       <Const txt={DOC["Const"]} Icon={Percent} />
-      {/* <Vmod txt={DOC["Bit"]} Icon={JoinInner} /> */}
-      {/* <Vmod txt={DOC["Arith"]} Icon={Add} /> */}
-      {/* <Vmod txt={DOC["Mux"]} Icon={QuestionMark} /> */}
-      {/* <Vmod txt={DOC["Demux"]} Icon={QuestionMark} /> */}
+      <Vmod txt={DOC["Bit"]} Icon={JoinInner} />
+      <Vmod txt={DOC["Arith"]} Icon={Add} />
+      <Mux txt={DOC["Mux"]} Icon={QuestionMark} />
+      <Demux txt={DOC["Demux"]} Icon={QuestionMark} />
       <Vmod txt={DOC["Vmod"]} Icon={Memory} />
     </div>
   );
@@ -189,7 +188,7 @@ const Reg: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Reg", name: "reg0", type: "0" }}
+      selValue={{ obj: "Reg", name: "reg0", bit: 1 }}
     />
   );
 };
@@ -204,7 +203,7 @@ const Lut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Lut", name: "lut0", input: 4, output: 4 }}
+      selValue={{ obj: "Lut", name: "lut0", in_bit: 2, out_bit: 1 }}
     />
   );
 };
@@ -219,7 +218,7 @@ const Fsm: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Fsm", name: "fsm0", input: 4, state: 4 }}
+      selValue={{ obj: "Fsm", name: "fsm0", in_bit: 4, state: 4 }}
     />
   );
 };
@@ -249,7 +248,7 @@ const Concat: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Concat", name: "concat0", input: [8, 8] }}
+      selValue={{ obj: "Concat", name: "concat0", in_bits: [1, 1] }}
     />
   );
 };
@@ -264,7 +263,37 @@ const Const: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Const", name: "const0", value: 0, width: 8 }}
+      selValue={{ obj: "Const", name: "const0", val: 0, bit: 1 }}
+    />
+  );
+};
+
+const Mux: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Mux"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Mux", name: "mux0", sel: 2, bit: 1 }}
+    />
+  );
+};
+
+const Demux: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("");
+  return (
+    <PrimSelect
+      txt={txt}
+      Icon={Icon}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Demux"}
+      name={name}
+      nameSel={{ type: "none" }}
+      onNameChange={setName}
+      selValue={{ obj: "Demux", name: "demux0", sel: 2, bit: 1 }}
     />
   );
 };

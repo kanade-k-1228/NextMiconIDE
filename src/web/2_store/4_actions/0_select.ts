@@ -51,7 +51,10 @@ export const useSelectWaypoint = () => {
 const objRangeSelect = (objs: Obj<ObjViewExt & ObjResolveExt>[], rect: Rect): ObjKey[] => {
   return objs
     .filter((obj) => {
-      return corrision({ x: obj.pos[0], y: obj.pos[1], width: obj.width, height: 20 }, rect); // TODO: height
+      return corrision(
+        { x: obj.pos[0], y: obj.pos[1], width: obj.width, height: Math.max(obj.left_ports.length, obj.right_ports.length) * 40 },
+        rect,
+      ); // TODO: height
     })
     .map(({ name }) => name);
 };

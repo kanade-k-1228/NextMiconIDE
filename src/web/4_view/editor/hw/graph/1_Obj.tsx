@@ -1,5 +1,6 @@
 import { FC, useState } from "react";
-import { Const, Inst, Irq, Mem, Obj, ObjViewExt, Port, Reg, Vmod } from "~/types";
+import { PackPort } from "~/files";
+import { Concat, Const, Inst, Irq, Mem, Obj, ObjViewExt, Port, Reg, Slice, Vmod } from "~/types";
 import { Position, posAdd, posFlip } from "~/utils";
 import { ObjResolveExt, useColor } from "~/web/2_store";
 import { useObj } from "~/web/3_facade";
@@ -21,6 +22,10 @@ export const ObjView: FC<{ obj: Obj<ObjViewExt & ObjResolveExt> }> = ({ obj }) =
       return <ConstView obj={obj} />;
     case "Vmod":
       return <VmodView obj={obj} />;
+    case "Concat":
+      return <ConcatView obj={obj} />;
+    case "Slice":
+      return <SliceView obj={obj} />;
     default:
       return <></>;
   }
@@ -42,6 +47,7 @@ const MemView: FC<{ obj: Mem<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
+      radius={5}
     />
   );
 };
@@ -53,13 +59,14 @@ const IrqView: FC<{ obj: Irq<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
       pos={obj.pos}
       flip={obj.flip}
       width={obj.width}
-      left_ports={[{ name: "in", direct: "in", icon: "!" }]}
-      right_ports={[]}
+      left_ports={obj.left_ports}
+      right_ports={obj.right_ports}
       port_name={false}
       name={obj.name}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
+      radius={5}
     />
   );
 };
@@ -78,6 +85,7 @@ const PortView: FC<{ obj: Port<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
+      radius={5}
     />
   );
 };
@@ -91,15 +99,14 @@ const RegView: FC<{ obj: Reg<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const [hover, setHover] = useState(false);
 
   // Calculate
-  const [width, height] = [40, 40];
+  const [width, height] = [obj.width, obj.width];
   const [ox, oy] = obj.pos;
   const highlight = selected ? selected : hover;
-
-  const CLOCK = [
-    [10, 40],
-    [20, 25],
-    [30, 40],
-  ] as const;
+  const clk_mark = [
+    [-width / 4, width / 2],
+    [0, 0],
+    [width / 4, width / 2],
+  ];
 
   return (
     <g
@@ -110,8 +117,8 @@ const RegView: FC<{ obj: Reg<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
       onMouseDown={onMouseDown}
     >
       <rect
-        x={ox}
-        y={oy}
+        x={ox - width / 2}
+        y={oy - width / 2}
         rx={5}
         width={width}
         height={height}
@@ -121,7 +128,7 @@ const RegView: FC<{ obj: Reg<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
       />
       <polyline
         stroke={highlight ? color._.fill : color._.border}
-        points={CLOCK.map(([x, y]) => `${ox + x},${oy + y}`).join(" ")}
+        points={clk_mark.map(([x, y]) => `${ox + x},${oy + y}`).join(" ")}
         fill="none"
         strokeLinejoin="round"
         strokeWidth={3}
@@ -138,7 +145,7 @@ const ConstView: FC<{ obj: Const<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
-      name={obj.value.toString()}
+      name={`${obj.bit}'b${obj.val.toString()}`}
       port_name={false}
       width={obj.width}
       highlight={selected}
@@ -159,6 +166,42 @@ const InstView: FC<{ obj: Inst<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
       right_ports={obj.right_ports}
       name={obj.name}
       port_name={true}
+      width={obj.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
+  );
+};
+
+const SliceView: FC<{ obj: Slice<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
+  const { onClick, onMouseDown, selected } = useObj(obj);
+  return (
+    <ObjAtom
+      pos={obj.pos}
+      flip={obj.flip}
+      left_ports={obj.left_ports}
+      right_ports={obj.right_ports}
+      name={`${obj.range[0]}:${obj.range[1]}`}
+      port_name={false}
+      width={obj.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
+  );
+};
+
+const ConcatView: FC<{ obj: Concat<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
+  const { onClick, onMouseDown, selected } = useObj(obj);
+  return (
+    <ObjAtom
+      pos={obj.pos}
+      flip={obj.flip}
+      left_ports={obj.left_ports}
+      right_ports={obj.right_ports}
+      name={""}
+      port_name={false}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
@@ -194,8 +237,8 @@ const getTextAlign = (lhs: number, rhs: number, flip: boolean) => {
 };
 
 const ObjAtom: FC<{
-  left_ports: { name: string; direct: "in" | "out"; icon?: PortIcon }[];
-  right_ports: { name: string; direct: "in" | "out"; icon?: PortIcon }[];
+  left_ports: PackPort[];
+  right_ports: PackPort[];
   name: string;
   pos: Position;
   flip: boolean;
@@ -279,9 +322,7 @@ const ObjAtom: FC<{
   );
 };
 
-type PortIcon = "?" | "!" | ">" | "<";
-
-const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "left" | "right"; hov: boolean; icon?: PortIcon }> = ({
+const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "left" | "right"; hov: boolean; icon: PackPort["icon"] }> = ({
   name,
   pos,
   direct,
@@ -293,7 +334,7 @@ const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "le
   const color = useColor().editor.hw.graph.obj;
   const [cx, cy] = pos;
   const _color = hov ? color.hov : color._;
-  const _icon: PortIcon = icon ?? ((direct === "in") === (side === "left") ? ">" : "<");
+  const _icon = icon ?? ((direct === "in") === (side === "left") ? ">" : "<");
   const text_x = side === "left" ? cx + TEXT_OFFSET : cx - TEXT_OFFSET;
   const text_anchor = side === "left" ? "start" : "end";
   return (

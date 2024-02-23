@@ -15,35 +15,24 @@ export const portsState = selector<Port[]>({
   get: ({ get }) => {
     const objs = get(objResolvedState);
     return objs.flatMap((obj) => {
-      switch (obj.obj) {
-        case "Inst":
-        case "Mem":
-        case "Irq":
-        case "Port":
-        case "Reg":
-        case "Const":
-        case "Vmod":
-          return [
-            ...obj.left_ports.map((port, i, arr) => ({
-              key: `${obj.name}/${port.name}`,
-              object: obj.name,
-              name: port.name,
-              direct: port.direct,
-              width: port.width,
-              pos: posAdd(obj.pos, [((obj.flip ? 1 : -1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
-            })),
-            ...obj.right_ports.map((port, i, arr) => ({
-              key: `${obj.name}/${port.name}`,
-              object: obj.name,
-              name: port.name,
-              direct: port.direct,
-              width: port.width,
-              pos: posAdd(obj.pos, [((obj.flip ? -1 : 1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
-            })),
-          ];
-        default:
-          return [];
-      }
+      return [
+        ...obj.left_ports.map((port, i, arr) => ({
+          key: `${obj.name}/${port.name}`,
+          object: obj.name,
+          name: port.name,
+          direct: port.direct,
+          width: port.width,
+          pos: posAdd(obj.pos, [((obj.flip ? 1 : -1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
+        })),
+        ...obj.right_ports.map((port, i, arr) => ({
+          key: `${obj.name}/${port.name}`,
+          object: obj.name,
+          name: port.name,
+          direct: port.direct,
+          width: port.width,
+          pos: posAdd(obj.pos, [((obj.flip ? -1 : 1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
+        })),
+      ];
     });
   },
 });

@@ -33,7 +33,16 @@ export const useCanvasForeground = () => {
           ...fsm.value,
           pos: posRound(mousePosition),
           flip: false,
-          width: fsm.value.obj === "Inst" ? 200 : 120, // TODO: calc width using string length
+          width:
+            fsm.value.obj === "Inst"
+              ? 200
+              : fsm.value.obj === "Vmod"
+                ? 200
+                : fsm.value.obj === "Reg"
+                  ? 40
+                  : fsm.value.obj === "Mux"
+                    ? 80
+                    : 120, // TODO: calc width using string length
         });
         setState({ state: "Default", value: {} });
       }

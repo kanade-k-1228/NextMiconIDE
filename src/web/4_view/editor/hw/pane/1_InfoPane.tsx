@@ -31,11 +31,27 @@ const BoardInfo: FC = () => {
   const [detail, setDetail] = useState(false);
 
   return (
-    <div style={{ ...css.colGrid({ column: [20, null, null, 30], row: 30 }), height: 30 }}>
-      <div></div>
-      <Left>{proj.target.path.join("/")}</Left>
-      <div></div>
-      <div></div>
+    <div style={{ ...css.colGrid({ column: [20, null, null, 30], row: 30 }), height: "auto" }}>
+      <div style={{ ...css.colSubGrid, background: color._.bg, color: color._.text }}>
+        <div></div>
+        <Left>{proj.target.path.join("/")}</Left>
+        <div></div>
+        <IconButton color={color.item.btn} style={{ margin: "2px" }} onClick={() => setDetail(!detail)}>
+          {detail ? <KeyboardArrowDown /> : <KeyboardArrowLeft />}
+        </IconButton>
+      </div>
+      {detail && (
+        <>
+          {Object.entries(board.ioports).map(([k, v]) => (
+            <div style={{ ...css.colSubGrid, background: color._.bg, color: color._.text }}>
+              <div></div>
+              <Left>{k}</Left>
+              <div>{v}</div>
+              <div>Port/In</div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 };
@@ -44,9 +60,24 @@ const ObjList: FC = () => {
   const instances = useRecoilValue(objResolvedState);
   return (
     <div style={{ ...css.colGrid({ column: [20, null, null, 30], row: 30 }), height: "auto" }}>
-      {instances.map((inst) => (
-        <ObjListItem key={inst.name} obj={inst} />
-      ))}
+      {instances.map((inst) => {
+        switch (inst.obj) {
+          case "Inst":
+          case "Mem":
+          case "Irq":
+          case "Port":
+          case "Reg":
+          case "Lut":
+          case "Fsm":
+          case "Concat":
+          case "Slice":
+          case "Mux":
+          case "Demux":
+          case "Const":
+          case "Vmod":
+        }
+        return <ObjListItem key={inst.name} obj={inst} />;
+      })}
     </div>
   );
 };
@@ -57,7 +88,7 @@ const ObjListItem: FC<{ obj: Obj<ObjResolveExt> }> = ({ obj }) => {
   const color = useColor().editor.hw.pane.item;
 
   // Local State
-  const [detail, setDetail] = useState(false);
+  const [editting, setEditting] = useState(false);
   const [hover, setHover] = useState(false);
   const [newName, setNewName] = useState(obj.name);
 
@@ -78,12 +109,12 @@ const ObjListItem: FC<{ obj: Obj<ObjResolveExt> }> = ({ obj }) => {
         <div></div>
         <Left>{obj.obj}</Left>
         <Left>{obj.name}</Left>
-        <IconButton color={color.btn} style={{ margin: "2px" }} onClick={() => setDetail(!detail)}>
-          {detail ? <KeyboardArrowDown /> : <KeyboardArrowLeft />}
+        <IconButton color={color.btn} style={{ margin: "2px" }} onClick={() => setEditting(!editting)}>
+          {editting ? <Check /> : <KeyboardArrowLeft />}
         </IconButton>
       </div>
-      {detail && (
-        <div style={{ ...css.colSubGrid, cursor: "pointer", background: _color.bg, color: _color.text }}>
+      {editting && (
+        <div style={{ ...css.colSubGrid, background: _color.bg, color: _color.text }}>
           <div></div>
           <div></div>
           <input

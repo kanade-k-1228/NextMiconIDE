@@ -1,5 +1,5 @@
 export interface Package {
-  ports: (Port & PortSideExt)[];
+  ports: (PackPort & PortSideExt)[];
   params: { name: string; type: string }[];
   software?: {
     className: string;
@@ -8,11 +8,12 @@ export interface Package {
   };
 }
 
-export type Port = {
+export type PackPort = {
   name: string;
   type: string;
   width: number;
   direct: "in" | "out";
+  icon?: "?" | "!" | ">" | "<" | "#";
 };
 
 export type PortSideExt = { side: "left" | "right" };
