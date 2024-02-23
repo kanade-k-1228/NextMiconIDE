@@ -21,7 +21,7 @@ export const portsState = selector<Port[]>({
           object: obj.name,
           name: port.name,
           direct: port.direct,
-          width: port.width,
+          bit: port.bit,
           pos: posAdd(obj.pos, [((obj.flip ? 1 : -1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
         })),
         ...obj.right_ports.map((port, i, arr) => ({
@@ -29,7 +29,7 @@ export const portsState = selector<Port[]>({
           object: obj.name,
           name: port.name,
           direct: port.direct,
-          width: port.width,
+          bit: port.bit,
           pos: posAdd(obj.pos, [((obj.flip ? -1 : 1) * obj.width) / 2, getPinY(i, arr.length, 40)]),
         })),
       ];

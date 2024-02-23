@@ -308,7 +308,18 @@ const Vmod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Vmod", name: "vmod0", port: [], body: "" }}
+      selValue={{
+        obj: "Vmod",
+        name: "vmod0",
+        body: "",
+        port: [
+          { name: "clk", direct: "in", type: "w1", bit: 1, side: "left" },
+          { name: "in", direct: "in", type: "w1", bit: 1, side: "left" },
+          { name: "out", direct: "out", type: "w1", bit: 1, side: "right" },
+          { name: "ready", direct: "out", type: "w1", bit: 1, side: "right" },
+          { name: "ack", direct: "in", type: "w1", bit: 1, side: "right" },
+        ],
+      }}
     />
   );
 };

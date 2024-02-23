@@ -1,10 +1,10 @@
 import { FC, useState } from "react";
 import { PackPort } from "~/files";
-import { Concat, Const, Inst, Irq, Mem, Obj, ObjViewExt, Port, Reg, Slice, Vmod } from "~/types";
+import { Concat, Const, Demux, Inst, Irq, Mem, Mux, Obj, ObjViewExt, Port, Reg, Slice, Vmod } from "~/types";
 import { Position, posAdd, posFlip } from "~/utils";
 import { ObjResolveExt, useColor } from "~/web/2_store";
 import { useObj } from "~/web/3_facade";
-import { ExclamationIcon, LeftIcon, QuestionIcon, RightIcon } from "~/web/4_view/atom";
+import { ExclamationIcon, HashIcon, LeftIcon, QuestionIcon, RightIcon } from "~/web/4_view/atom";
 
 export const ObjView: FC<{ obj: Obj<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   switch (obj.obj) {
@@ -26,8 +26,13 @@ export const ObjView: FC<{ obj: Obj<ObjViewExt & ObjResolveExt> }> = ({ obj }) =
       return <ConcatView obj={obj} />;
     case "Slice":
       return <SliceView obj={obj} />;
-    default:
+    case "Lut":
+    case "Fsm":
       return <></>;
+    case "Mux":
+      return <MuxView obj={obj} />;
+    case "Demux":
+      return <DemuxView obj={obj} />;
   }
 };
 
@@ -53,7 +58,7 @@ const MemView: FC<{ obj: Mem<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 };
 
 const IrqView: FC<{ obj: Irq<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
-  const { onClick, onMouseDown, key, selected } = useObj(obj);
+  const { onClick, onMouseDown, selected } = useObj(obj);
   return (
     <ObjAtom
       pos={obj.pos}
@@ -72,7 +77,7 @@ const IrqView: FC<{ obj: Irq<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 };
 
 const PortView: FC<{ obj: Port<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
-  const { onClick, onMouseDown, key, selected } = useObj(obj);
+  const { onClick, onMouseDown, selected } = useObj(obj);
   return (
     <ObjAtom
       pos={obj.pos}
@@ -92,7 +97,7 @@ const PortView: FC<{ obj: Port<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 
 const RegView: FC<{ obj: Reg<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   // Global State
-  const { onClick, onMouseDown, key, selected } = useObj(obj);
+  const { onClick, onMouseDown, selected } = useObj(obj);
   const color = useColor().editor.hw.graph.obj;
 
   // Local State
@@ -201,6 +206,42 @@ const ConcatView: FC<{ obj: Concat<ObjViewExt & ObjResolveExt> }> = ({ obj }) =>
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={""}
+      port_name={false}
+      width={obj.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
+  );
+};
+
+const MuxView: FC<{ obj: Mux<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
+  const { onClick, onMouseDown, selected } = useObj(obj);
+  return (
+    <ObjAtom
+      pos={obj.pos}
+      flip={obj.flip}
+      left_ports={obj.left_ports}
+      right_ports={obj.right_ports}
+      name={obj.name}
+      port_name={false}
+      width={obj.width}
+      highlight={selected}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+    />
+  );
+};
+
+const DemuxView: FC<{ obj: Demux<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
+  const { onClick, onMouseDown, selected } = useObj(obj);
+  return (
+    <ObjAtom
+      pos={obj.pos}
+      flip={obj.flip}
+      left_ports={obj.left_ports}
+      right_ports={obj.right_ports}
+      name={obj.name}
       port_name={false}
       width={obj.width}
       highlight={selected}
@@ -344,6 +385,7 @@ const ObjPort: FC<{ name: string; pos: Position; direct: "in" | "out"; side: "le
       {_icon === "<" && <LeftIcon cx={cx} cy={cy} color={_color.port_icon} />}
       {_icon === "?" && <QuestionIcon cx={cx} cy={cy} color={_color.port_icon} />}
       {_icon === "!" && <ExclamationIcon cx={cx} cy={cy} color={_color.port_icon} />}
+      {_icon === "#" && <HashIcon cx={cx} cy={cy} color={_color.port_icon} />}
       <text x={text_x} y={cy} fontSize={18} textAnchor={text_anchor} alignmentBaseline="middle">
         {name}
       </text>

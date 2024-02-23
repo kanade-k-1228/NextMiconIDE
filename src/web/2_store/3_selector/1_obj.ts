@@ -1,6 +1,6 @@
 import { selector } from "recoil";
 import { PackPort } from "~/files";
-import { Obj, ObjViewExt } from "~/types";
+import { Concat, Const, Demux, Fsm, Inst, Irq, Lut, Mem, Mux, Obj, ObjViewExt, Port, Reg, Slice, Vmod } from "~/types";
 import { posAdd, posRound, posSub } from "~/utils";
 import { Pack, getObjKey, packToString } from "~/web/1_type";
 import {
@@ -73,7 +73,7 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
               pos,
               left_ports: pack.ports.filter((port) => port.side === "left"),
               right_ports: pack.ports.filter((port) => port.side === "right"),
-            },
+            } as Inst<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Mem": {
@@ -90,9 +90,9 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
                   ...obj,
                   pos,
                   addr,
-                  left_ports: [{ name: "out", type: "u8", width: 1, direct: "out", icon: "#" }],
+                  left_ports: [{ name: "out", type: "u8", bit: 1, direct: "out", icon: "#" }],
                   right_ports: [],
-                },
+                } as Mem<ObjViewExt & ObjResolveExt>,
               };
             case "RO":
               return {
@@ -101,16 +101,21 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
                   ...obj,
                   pos,
                   addr,
-                  left_ports: [{ name: "in", type: "u8", width: 1, direct: "in", icon: "#" }],
+                  left_ports: [{ name: "in", type: "u8", bit: 1, direct: "in", icon: "#" }],
                   right_ports: [],
-                },
+                } as Mem<ObjViewExt & ObjResolveExt>,
               };
           }
         }
         case "Irq": {
           return {
             type: "obj",
-            value: { ...obj, pos, left_ports: [{ name: "in", type: "wire", width: 1, direct: "in", icon: "!" }], right_ports: [] },
+            value: {
+              ...obj,
+              pos,
+              left_ports: [{ name: "in", type: "wire", bit: 1, direct: "in", icon: "!" }],
+              right_ports: [],
+            } as Irq<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Port": {
@@ -118,12 +123,22 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
             case "In":
               return {
                 type: "obj",
-                value: { ...obj, pos, left_ports: [{ name: "out", type: "wire", width: 1, direct: "out" }], right_ports: [] },
+                value: {
+                  ...obj,
+                  pos,
+                  left_ports: [{ name: "out", type: "wire", bit: 1, direct: "out" }],
+                  right_ports: [],
+                } as Port<ObjViewExt & ObjResolveExt>,
               };
             case "Out":
               return {
                 type: "obj",
-                value: { ...obj, pos, left_ports: [{ name: "in", type: "wire", width: 1, direct: "in" }], right_ports: [] },
+                value: {
+                  ...obj,
+                  pos,
+                  left_ports: [{ name: "in", type: "wire", bit: 1, direct: "in" }],
+                  right_ports: [],
+                } as Port<ObjViewExt & ObjResolveExt>,
               };
             case "InOut":
               return {
@@ -132,12 +147,12 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
                   ...obj,
                   pos,
                   left_ports: [
-                    { name: "iosel", type: "wire", width: 1, direct: "in", icon: "?" },
-                    { name: "out", type: "wire", width: 1, direct: "in" },
-                    { name: "in", type: "wire", width: 1, direct: "out" },
+                    { name: "iosel", type: "wire", bit: 1, direct: "in", icon: "?" },
+                    { name: "out", type: "wire", bit: 1, direct: "in" },
+                    { name: "in", type: "wire", bit: 1, direct: "out" },
                   ],
                   right_ports: [],
-                },
+                } as Port<ObjViewExt & ObjResolveExt>,
               };
           }
         }
@@ -147,16 +162,32 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
             value: {
               ...obj,
               pos,
-              left_ports: [{ name: "in", type: "wire", width: 1, direct: "in" }],
-              right_ports: [{ name: "out", type: "wire", width: 1, direct: "out" }],
-            },
+              left_ports: [{ name: "in", type: "wire", bit: 1, direct: "in" }],
+              right_ports: [{ name: "out", type: "wire", bit: 1, direct: "out" }],
+            } as Reg<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Lut": {
-          return { type: "obj", value: { ...obj, pos, left_ports: [], right_ports: [] } };
+          return {
+            type: "obj",
+            value: {
+              ...obj,
+              pos,
+              left_ports: [],
+              right_ports: [],
+            } as Lut<ObjViewExt & ObjResolveExt>,
+          };
         }
         case "Fsm": {
-          return { type: "obj", value: { ...obj, pos, left_ports: [], right_ports: [] } };
+          return {
+            type: "obj",
+            value: {
+              ...obj,
+              pos,
+              left_ports: [],
+              right_ports: [],
+            } as Fsm<ObjViewExt & ObjResolveExt>,
+          };
         }
         case "Concat": {
           return {
@@ -164,9 +195,9 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
             value: {
               ...obj,
               pos,
-              left_ports: obj.in_bits.map((w, i) => ({ name: `in${i}`, direct: "in", type: "wire", width: w })),
-              right_ports: [{ name: "out", direct: "out", type: "wire", width: obj.in_bits.reduce((acc, cur) => acc + cur, 0) }],
-            },
+              left_ports: obj.in_bits.map((w, i) => ({ name: `in${i}`, direct: "in", type: "wire", bit: w })),
+              right_ports: [{ name: "out", direct: "out", type: "wire", bit: obj.in_bits.reduce((acc, cur) => acc + cur, 0) }],
+            } as Concat<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Slice": {
@@ -175,9 +206,9 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
             value: {
               ...obj,
               pos,
-              left_ports: [{ name: "in", direct: "in", type: "wire", width: 1 }],
-              right_ports: [{ name: "out", direct: "out", type: "wire", width: obj.range[1] - obj.range[0] + 1 }],
-            },
+              left_ports: [{ name: "in", direct: "in", type: "wire", bit: 1 }],
+              right_ports: [{ name: "out", direct: "out", type: "wire", bit: obj.range[1] - obj.range[0] + 1 }],
+            } as Slice<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Const": {
@@ -187,8 +218,8 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
               ...obj,
               pos,
               left_ports: [],
-              right_ports: [{ name: "out", type: "wire", width: 8, direct: "out" }],
-            },
+              right_ports: [{ name: "out", type: "wire", bit: 1, direct: "out" }],
+            } as Const<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Mux": {
@@ -197,21 +228,31 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
             value: {
               ...obj,
               pos,
-              left_ports: Array(obj.sel).map((_, i) => ({ name: `in${i}`, direct: "in", type: `w${obj.width}`, width: obj.width })),
+              left_ports: Array(obj.sel).map((_, i) => ({ name: `in${i}`, direct: "in", type: `w${obj.width}`, bit: obj.bit })),
               right_ports: [],
-            },
+            } as Mux<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Demux": {
           return {
             type: "obj",
-            value: { ...obj, pos, left_ports: [], right_ports: [{ name: "out", direct: "out", type: "u8", width: 8 }] },
+            value: {
+              ...obj,
+              pos,
+              left_ports: [{ name: "in", direct: "in", type: "w1", bit: obj.bit }],
+              right_ports: Array(obj.sel).map((_, i) => ({ name: `o${i}`, direct: "out", type: "w1", bit: obj.bit })),
+            } as Demux<ObjViewExt & ObjResolveExt>,
           };
         }
         case "Vmod": {
           return {
             type: "obj",
-            value: { ...obj, pos, left_ports: [{ name: "clk", type: "wire", width: 1, direct: "in" }], right_ports: [] },
+            value: {
+              ...obj,
+              pos,
+              left_ports: obj.port.filter((port) => port.side === "left"),
+              right_ports: obj.port.filter((port) => port.side === "right"),
+            } as Vmod<ObjViewExt & ObjResolveExt>,
           };
         }
       }

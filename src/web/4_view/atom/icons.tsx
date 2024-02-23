@@ -30,3 +30,14 @@ export const ExclamationIcon: FC<{ cx: number; cy: number; color: string }> = ({
     <circle cx={cx} cy={cy + 8} r={2} fill={color} />
   </>
 );
+
+export const HashIcon: FC<{ cx: number; cy: number; color: string }> = ({ cx, cy, color }) => {
+  return (
+    <g strokeWidth={3} stroke={color} strokeLinecap="round">
+      <line x1={cx - 2} y1={cy - 8} x2={cx - 4} y2={cy + 8} />
+      <line x1={cx + 4} y1={cy - 8} x2={cx + 2} y2={cy + 8} />
+      <line x1={cx - 6} y1={cy - 4} x2={cx + 7} y2={cy - 4} />
+      <line x1={cx - 7} y1={cy + 4} x2={cx + 6} y2={cy + 4} />
+    </g>
+  );
+};

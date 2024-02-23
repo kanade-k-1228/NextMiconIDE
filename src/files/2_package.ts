@@ -11,7 +11,7 @@ export interface Package {
 export type PackPort = {
   name: string;
   type: string;
-  width: number;
+  bit: number;
   direct: "in" | "out";
   icon?: "?" | "!" | ">" | "<" | "#";
 };

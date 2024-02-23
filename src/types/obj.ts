@@ -1,3 +1,5 @@
+import { PackPort } from "~/files";
+
 export interface ObjExt {
   Inst: object;
   Mem: object;
@@ -46,7 +48,7 @@ export type Opr<Ext extends ObjExt = ObjExt> = { obj: "Opr"; name: string; type:
 export type Vmod<Ext extends ObjExt = ObjExt> = {
   obj: "Vmod";
   name: string;
-  port: { name: string; direct: "In" | "Out"; bit: number; side: "left" | "right" }[];
+  port: (PackPort & { side: "left" | "right" })[];
   body: string;
 } & Ext["Vmod"];
 
