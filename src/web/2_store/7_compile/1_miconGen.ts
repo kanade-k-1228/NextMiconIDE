@@ -3,6 +3,7 @@ import { Wire, eqPortKey, wireName } from "~/web/1_type";
 import { cpp } from "./3_cppGen";
 import { VInstance, VWire, verilog } from "./2_verilogGen";
 import { ObjResolveExt } from "../3_selector/1_obj";
+import { hex } from "~/web/0_common";
 
 // ------------------------------------------------------------------------------------------------
 // 置換リスト
@@ -48,11 +49,11 @@ const genDefinitions = (objs: Obj<ObjResolveExt>[]) =>
   objs
     .flatMap((obj) => {
       if (obj.obj === "Inst" && obj.addr) {
-        return [cpp.instantiation(obj.mod[1], obj.name, `(volatile uint32_t*)0x${obj.addr}00'0000`)];
+        return [cpp.instantiation(obj.mod[1], obj.name, `(volatile uint32_t*)0x${hex(obj.addr, 2)}00'0000`)];
       } else if (obj.obj === "Mem" && obj.variant === "Read") {
-        return [cpp.instantiation("MemRead", obj.name, `(volatile uint32_t*)0x${obj.addr}00'0000`)];
+        return [cpp.instantiation("MemRead", obj.name, `(volatile uint32_t*)0x${hex(obj.addr, 2)}00'0000`)];
       } else if (obj.obj === "Mem" && obj.variant === "Write") {
-        return [cpp.instantiation("MemWrite", obj.name, `(volatile uint32_t*)0x${obj.addr}00'0000`)];
+        return [cpp.instantiation("MemWrite", obj.name, `(volatile uint32_t*)0x${hex(obj.addr, 2)}00'0000`)];
       } else return [];
     })
     .join("\n");
@@ -107,7 +108,7 @@ const genIOBuffer = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
           return [iobuf, inWire];
         } else if (obj.variant === "In") {
           // IN に接続されているワイヤを定義する
-          const inWire = verilog.wire({ name: wireName([obj.name, "in"]), width: 1 });
+          const inWire = verilog.wire({ name: wireName([obj.name, "out"]), width: 1 });
           // IOバッファの生成
           const iobuf = verilog.instance({
             module: "PortIn",
@@ -115,7 +116,7 @@ const genIOBuffer = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
             params: [],
             ioport: [
               { port: "pin", wire: obj.name },
-              { port: "in", wire: wireName([obj.name, "in"]) },
+              { port: "out", wire: wireName([obj.name, "out"]) },
             ],
           });
           return [iobuf, inWire];
@@ -133,7 +134,7 @@ const genIOBuffer = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
             params: [],
             ioport: [
               { port: "pin", wire: obj.name },
-              { port: "out", wire: wireName(outWire.first) },
+              { port: "in", wire: wireName(outWire.first) },
             ],
           });
           return [iobuf];
@@ -147,9 +148,9 @@ const genIRQ = (objs: Obj<ObjResolveExt>[], wires: Wire[]) => {
   return objs
     .flatMap((obj) => {
       if (obj.obj === "Irq") {
-        const irqWire = wires.find((wire) => eqPortKey(wire.last, [obj.name, "irq"]));
+        const irqWire = wires.find((wire) => eqPortKey(wire.last, [obj.name, "in"]));
         if (!irqWire) {
-          console.error(`Open Port: ${obj.name}.irq`);
+          console.error(`Open Port: ${obj.name}.in`);
           return [];
         }
         const irqNo = obj.name.slice(3);
@@ -194,7 +195,7 @@ const genBusPorts = (name: string) => {
 
 const genBusWires = (name: string, addr: number) => {
   return [
-    { name: `${name}_sel`, width: 1, init: `mem_addr[31:24] == 8'd${addr}` },
+    { name: `${name}_sel`, width: 1, init: `mem_addr[31:24] == 8'h${hex(addr, 2)}` },
     { name: `${name}_valid`, width: 1, init: `mem_valid && ${name}_sel` },
     { name: `${name}_ready`, width: 1 },
     { name: `${name}_rdata`, width: 32 },
