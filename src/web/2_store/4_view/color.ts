@@ -96,6 +96,7 @@ export const defaultColorName: ColorName = "dark_sakura";
 // Collor pallete
 
 const C = {
+  transparent: "#00000000",
   black: "#000",
   gray: { dark: "#333", middark: "#666", midlight: "#999", light: "#CCC" },
   white: "#FFF",
@@ -165,7 +166,7 @@ export const colorThemes: Record<ColorName, ColorTheme> = {
             sel: { bg: C.sakura.dark, icon: C.white, text: C.black },
             hov: { bg: C.sakura.light, icon: C.sakura.dark, text: C.black },
             btn: {
-              _: { bg: C.gray.midlight, icon: C.gray.dark, text: C.black },
+              _: { bg: C.transparent, icon: C.gray.dark, text: C.black },
               hov: { bg: C.white, icon: C.sakura.dark, text: C.black },
             },
           },

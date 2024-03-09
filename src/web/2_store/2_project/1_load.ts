@@ -5,7 +5,7 @@ import { Target, Project } from "~/files";
 import { useMessage } from "../0_sys/message";
 import { localPacksState } from "../1_library/1_packs";
 import { useResetHweditorState } from "../4_view/editor";
-import { boardPathState, boardState, projectNameState, projectPathState, projectState } from "./0_project";
+import { targetPathState, targetState, projectNameState, projectPathState, projectState } from "./0_project";
 import { revertBufferState } from "./2_revert";
 
 export const useOpenProject = () => {
@@ -18,8 +18,8 @@ export const useOpenProject = () => {
   const setProjectPath = useSetRecoilState(projectPathState);
   const setProjectName = useSetRecoilState(projectNameState);
   const setProject = useSetRecoilState(projectState);
-  const setBoardPath = useSetRecoilState(boardPathState);
-  const setBoard = useSetRecoilState(boardState);
+  const setBoardPath = useSetRecoilState(targetPathState);
+  const setBoard = useSetRecoilState(targetState);
 
   return async (path: string[]) => {
     window.log.info("openProject: Start");

@@ -4,7 +4,7 @@ import { Concat, Const, Demux, Fsm, Inst, Irq, Lut, Mem, Mux, Obj, ObjViewExt, P
 import { posAdd, posRound, posSub } from "~/utils";
 import { Pack, getObjKey, packToString } from "~/web/1_type";
 import {
-  boardState,
+  targetState,
   hwEditorFSM,
   objIsSelected,
   localPacksState,
@@ -37,7 +37,7 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
   get: ({ get }) => {
     const project = get(projectState);
     const packs = get(localPacksState);
-    const board = get(boardState);
+    const board = get(targetState);
     const { state, value } = get(hwEditorFSM);
     const mousePosition = get(mousePositionState);
     const selectedObjects = get(selectedObjectsState);
@@ -83,7 +83,7 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
           addrAcc += Math.ceil(obj.byte / board.addr.pageSize);
 
           switch (obj.variant) {
-            case "RW":
+            case "Write":
               return {
                 type: "obj",
                 value: {
@@ -94,7 +94,7 @@ const objResolveState = selector<({ type: "obj"; value: Obj<ObjViewExt & ObjReso
                   right_ports: [],
                 } as Mem<ObjViewExt & ObjResolveExt>,
               };
-            case "RO":
+            case "Read":
               return {
                 type: "obj",
                 value: {

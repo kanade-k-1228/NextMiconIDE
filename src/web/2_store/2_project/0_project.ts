@@ -13,5 +13,5 @@ export const projectAllState = atom<ProjectAll>({ key: "projectAll" });
 export const projectPathState = atom<string[]>({ key: "projectPath" });
 export const projectNameState = atom<string>({ key: "projectName" });
 export const projectState = atom<Project>({ key: "project" });
-export const boardPathState = atom<string[]>({ key: "boardPath" });
-export const boardState = atom<Target>({ key: "board" });
+export const targetPathState = atom<string[]>({ key: "boardPath" });
+export const targetState = atom<Target>({ key: "board" });

@@ -33,7 +33,7 @@ export type Obj<Ext extends ObjExt = ObjExt> =
   | Vmod<Ext>;
 
 export type Inst<Ext extends ObjExt = ObjExt> = { obj: "Inst"; name: string; mod: string[]; params: Params } & Ext["Inst"];
-export type Mem<Ext extends ObjExt = ObjExt> = { obj: "Mem"; name: string; variant: "RW" | "RO"; byte: number } & Ext["Mem"];
+export type Mem<Ext extends ObjExt = ObjExt> = { obj: "Mem"; name: string; variant: "Write" | "Read"; byte: number } & Ext["Mem"];
 export type Irq<Ext extends ObjExt = ObjExt> = { obj: "Irq"; name: string; sw_stmts: string[] } & Ext["Irq"];
 export type Port<Ext extends ObjExt = ObjExt> = { obj: "Port"; name: string; variant: "In" | "Out" | "InOut" } & Ext["Port"];
 export type Reg<Ext extends ObjExt = ObjExt> = { obj: "Reg"; name: string; bit: number; init?: number } & Ext["Reg"];

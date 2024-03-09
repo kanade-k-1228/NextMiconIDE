@@ -2,17 +2,70 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { Target, Project } from "~/files";
 import { Position } from "~/utils";
 import { ObjKey, Port, Wire, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
-import { boardState, projectState } from "../2_project/0_project";
+import { targetState, projectState } from "../2_project/0_project";
 import { useRevert } from "../2_project/2_revert";
 import { portsState } from "../3_selector/2_port";
 import { useSelectObject } from "./0_select";
 import { Obj, ObjViewExt } from "~/types";
 
 // --------------------------------------------------------------------------------
-// Create Instance
+// Find Unused
+
+const getUnusedInPin = (target: Target, proj: Project) => {
+  return Object.entries(target.ioports)
+    .filter(([_, type]) => type.includes("i"))
+    .filter(([name, _]) => proj.objs.find((obj) => obj.obj === "Port" && obj.name === name) === undefined)
+    .map(([name, _]) => name);
+};
+
+export const useUnusedInPin = () => {
+  const proj = useRecoilValue(projectState);
+  const target = useRecoilValue(targetState);
+  return getUnusedInPin(target, proj);
+};
+
+const getUnusedOutPin = (target: Target, proj: Project) => {
+  return Object.entries(target.ioports)
+    .filter(([_, type]) => type.includes("o"))
+    .filter(([name, _]) => proj.objs.find((obj) => obj.obj === "Port" && obj.name === name) === undefined)
+    .map(([name, _]) => name);
+};
+
+export const useUnusedOutPin = () => {
+  const proj = useRecoilValue(projectState);
+  const target = useRecoilValue(targetState);
+  return getUnusedOutPin(target, proj);
+};
+
+const getUnusedInOutPin = (target: Target, proj: Project) => {
+  return Object.entries(target.ioports)
+    .filter(([_, type]) => type.includes("i") && type.includes("o"))
+    .filter(([name, _]) => proj.objs.find((obj) => obj.obj === "Port" && obj.name === name) === undefined)
+    .map(([name, _]) => name);
+};
+
+export const useUnusedInOutPin = () => {
+  const proj = useRecoilValue(projectState);
+  const target = useRecoilValue(targetState);
+  return getUnusedInOutPin(target, proj);
+};
+
+const getUnusedIrq = (target: Target, proj: Project) => {
+  return target.irqs.filter((irq) => proj.objs.find((obj) => obj.obj === "Irq" && obj.name === irq) === undefined);
+};
+
+export const useUnusedIrq = () => {
+  const proj = useRecoilValue(projectState);
+  const target = useRecoilValue(targetState);
+  return getUnusedIrq(target, proj);
+};
+
+// --------------------------------------------------------------------------------
+// Create Object
 
 export const objExists = (project: Project, key: ObjKey) => project.objs.find((obj) => objKeyEq(getObjKey(obj), key)) !== undefined;
 
+// Create temporary name
 export const getNewObjName = (project: Project, base: string) => {
   for (let i = 0; Number.isSafeInteger(i); ++i) {
     const name = `${base}${i}`;

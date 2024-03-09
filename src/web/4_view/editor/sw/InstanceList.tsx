@@ -2,7 +2,7 @@ import { KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material";
 import { CSSProperties, FC, Fragment, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Func } from "~/files";
-import { Inst } from "~/types";
+import { Inst, Mem } from "~/types";
 import { ObjResolveExt, objResolvedState, useColor, useSoftwareEditor } from "~/web/2_store";
 import { css } from "~/web/4_view/atom";
 
@@ -19,18 +19,17 @@ export const InstanceList = () => {
           userSelect: "none",
         }}
       >
-        {objs
-          .filter((obj) => obj.obj === "Inst" && obj.pack.software)
-          .toSorted((lhs, rhs) => (lhs.name > rhs.name ? 1 : -1))
-          .flatMap((obj) => {
-            return obj.obj === "Inst" ? [<InstanceDoc key={obj.name} inst={obj} />] : [];
-          })}
+        {objs.flatMap((obj) => {
+          if (obj.obj === "Inst") return [<InstanceDoc key={obj.name} obj={obj} />];
+          if (obj.obj === "Mem") return [<MemDoc key={obj.name} obj={obj} />];
+          return [];
+        })}
       </div>
     </div>
   );
 };
 
-const InstanceDoc: FC<{ inst: Inst<ObjResolveExt> }> = ({ inst }) => {
+const InstanceDoc: FC<{ obj: Inst<ObjResolveExt> }> = ({ obj }) => {
   const color = useColor().editor.sw.pane.inst;
 
   const [open, setOpen] = useState(false);
@@ -57,11 +56,56 @@ const InstanceDoc: FC<{ inst: Inst<ObjResolveExt> }> = ({ inst }) => {
         onMouseLeave={() => setHover(false)}
       >
         <div style={{ ...css.center }}>{open ? <KeyboardArrowDown style={iconCss} /> : <KeyboardArrowRight style={iconCss} />}</div>
-        <div style={{ ...css.left, fontSize: SIZE - 10 }}>{inst.name}</div>
+        <div style={{ ...css.left, fontSize: SIZE - 10 }}>{obj.name}</div>
       </div>
       {open && (
         <div style={{ display: "flex", flexDirection: "column", rowGap: 10 }}>
-          {inst.pack.software?.methods.map((method, i) => <Func key={i} inst={inst.name} note={method.note} method={method} />)}
+          {obj.pack.software?.methods.map((method, i) => <Func key={i} inst={obj.name} note={method.note} method={method} />)}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MemDoc: FC<{ obj: Mem<ObjResolveExt> }> = ({ obj }) => {
+  const color = useColor().editor.sw.pane.inst;
+
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState(false);
+
+  const _color = hover ? color.hov : color._;
+
+  const SIZE = 30;
+  const iconCss: CSSProperties = { height: `${SIZE}px`, width: `${SIZE}px` };
+
+  return (
+    <div style={{ height: "auto", overflow: "hidden" }}>
+      <div
+        style={{
+          height: SIZE,
+          cursor: "pointer",
+          display: "grid",
+          gridTemplateColumns: `${SIZE}px 1fr`,
+          background: _color.bg,
+          color: _color.text,
+        }}
+        onClick={() => setOpen(!open)}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        <div style={{ ...css.center }}>{open ? <KeyboardArrowDown style={iconCss} /> : <KeyboardArrowRight style={iconCss} />}</div>
+        <div style={{ ...css.left, fontSize: SIZE - 10 }}>{obj.name}</div>
+      </div>
+      {open && (
+        <div style={{ display: "flex", flexDirection: "column", rowGap: 10 }}>
+          {obj.variant === "Read" && <Func inst={obj.name} note={"Read Registor"} method={{ name: "read", type: "uint32_t", args: [] }} />}
+          {obj.variant === "Write" && (
+            <Func
+              inst={obj.name}
+              note={"Write Registor"}
+              method={{ name: "write", type: "void", args: [{ name: "value", type: "uint32_t" }] }}
+            />
+          )}{" "}
         </div>
       )}
     </div>

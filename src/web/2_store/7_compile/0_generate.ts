@@ -1,5 +1,5 @@
 import { useRecoilValue } from "recoil";
-import { boardPathState, boardState, projectPathState, projectState } from "../2_project/0_project";
+import { targetPathState, targetState, projectPathState, projectState } from "../2_project/0_project";
 import { objResolvedState } from "../3_selector/1_obj";
 import { wiresResolvedState } from "../3_selector/3_wire";
 import { genReplace } from "./1_miconGen";
@@ -7,8 +7,8 @@ import { genReplace } from "./1_miconGen";
 export const useGenerate = () => {
   const projectPath = useRecoilValue(projectPathState);
   const project = useRecoilValue(projectState);
-  const boardPath = useRecoilValue(boardPathState);
-  const board = useRecoilValue(boardState);
+  const boardPath = useRecoilValue(targetPathState);
+  const board = useRecoilValue(targetState);
   const instances = useRecoilValue(objResolvedState);
   const wires = useRecoilValue(wiresResolvedState);
   return async () => {

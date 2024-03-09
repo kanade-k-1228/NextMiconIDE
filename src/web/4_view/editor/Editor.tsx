@@ -2,7 +2,7 @@ import { FC, useEffect } from "react";
 import { useRecoilState, useRecoilValueLoadable } from "recoil";
 
 import "allotment/dist/style.css";
-import { boardState, modeState, useOpenProject, useOpenSoftware, useRunMake } from "~/web/2_store";
+import { targetState, modeState, useOpenProject, useOpenSoftware, useRunMake } from "~/web/2_store";
 import { BottomBar } from "./common/BottomBar";
 import { TopBar } from "./common/TopBar";
 import { HWEditor } from "./hw/HWEditor";
@@ -10,7 +10,7 @@ import { SWeditor } from "./sw/SWEditor";
 import { css } from "../atom";
 
 export const Editor: FC<{ projectPath: string[] }> = ({ projectPath }) => {
-  const loading = useRecoilValueLoadable(boardState);
+  const loading = useRecoilValueLoadable(targetState);
   const openProject = useOpenProject();
   const openSoftware = useOpenSoftware();
 

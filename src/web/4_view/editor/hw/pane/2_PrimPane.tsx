@@ -20,9 +20,18 @@ import {
   SvgIconComponent,
 } from "@mui/icons-material";
 import { FC, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Obj } from "~/types";
-import { States, hwEditorFSM, useColor } from "~/web/2_store";
+import {
+  States,
+  boardsState,
+  hwEditorFSM,
+  useColor,
+  useUnusedInPin,
+  useUnusedOutPin,
+  useUnusedInOutPin,
+  useUnusedIrq,
+} from "~/web/2_store";
 import { Center, css } from "~/web/4_view/atom";
 
 // Primitive Elements
@@ -31,7 +40,7 @@ const DOC_JA = {
   In: "入力ピン",
   Out: "出力ピン",
   InOut: "入出力ピン",
-  Irq: "割り込みトリガ",
+  Irq: "割り込み",
   MemRO: "入力レジスタ",
   MemRW: "出力レジスタ",
   Reg: "フリップフロップ",
@@ -73,7 +82,13 @@ export const PrimPane: FC = () => {
       <Irq txt={DOC["Irq"]} Icon={PriorityHigh} />
       <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
       <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
-      <Reg txt={DOC["Reg"]} Icon={AccessTime} />
+      <Vmod txt={DOC["Vmod"]} Icon={Memory} />
+    </div>
+  );
+};
+
+{
+  /* <Reg txt={DOC["Reg"]} Icon={AccessTime} />
       <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} />
       <Fsm txt={DOC["Fsm"]} Icon={Share} />
       <Slice txt={DOC["Slice"]} Icon={DataArray} />
@@ -83,20 +98,19 @@ export const PrimPane: FC = () => {
       <Vmod txt={DOC["Arith"]} Icon={Add} />
       <Mux txt={DOC["Mux"]} Icon={QuestionMark} />
       <Demux txt={DOC["Demux"]} Icon={QuestionMark} />
-      <Vmod txt={DOC["Vmod"]} Icon={Memory} />
-    </div>
-  );
-};
+       */
+}
 
 const PortIn: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
+  const availableInPin = useUnusedInPin();
   return (
     <PrimSelect
       txt={txt}
       Icon={Icon}
       isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Port" && fsm.value.variant === "In"}
       name={name}
-      nameSel={{ type: "list", list: ["pin1", "pin2", "pin3"] }}
+      nameSel={{ type: "list", list: availableInPin }}
       onNameChange={setName}
       selValue={{ obj: "Port", name: name, variant: "In" }}
     />
@@ -105,13 +119,14 @@ const PortIn: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
 
 const PortOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
+  const availableOutPin = useUnusedOutPin();
   return (
     <PrimSelect
       txt={txt}
       Icon={Icon}
       isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Port" && fsm.value.variant === "Out"}
       name={name}
-      nameSel={{ type: "list", list: ["pin1", "pin2", "pin3"] }}
+      nameSel={{ type: "list", list: availableOutPin }}
       onNameChange={setName}
       selValue={{ obj: "Port", name: name, variant: "Out" }}
     />
@@ -120,13 +135,14 @@ const PortOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => 
 
 const PortInOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
+  const availableInOutPin = useUnusedInOutPin();
   return (
     <PrimSelect
       txt={txt}
       Icon={Icon}
       isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Port" && fsm.value.variant === "InOut"}
       name={name}
-      nameSel={{ type: "list", list: ["pin1", "pin2", "pin3"] }}
+      nameSel={{ type: "list", list: availableInOutPin }}
       onNameChange={setName}
       selValue={{ obj: "Port", name: name, variant: "InOut" }}
     />
@@ -135,13 +151,14 @@ const PortInOut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) =
 
 const Irq: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
+  const availableIrq = useUnusedIrq();
   return (
     <PrimSelect
       txt={txt}
       Icon={Icon}
       isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Irq"}
       name={name}
-      nameSel={{ type: "list", list: ["irq3", "irq4", "irq5"] }}
+      nameSel={{ type: "list", list: availableIrq }}
       onNameChange={setName}
       selValue={{ obj: "Irq", name: name, sw_stmts: [] }}
     />
@@ -154,11 +171,11 @@ const MemRW: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Mem" && fsm.value.variant === "RW"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Mem" && fsm.value.variant === "Write"}
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Mem", variant: "RW", name: name, byte: 1 }}
+      selValue={{ obj: "Mem", variant: "Write", name: name, byte: 1 }}
     />
   );
 };
@@ -169,11 +186,11 @@ const MemRO: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
     <PrimSelect
       txt={txt}
       Icon={Icon}
-      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Mem" && fsm.value.variant === "RO"}
+      isSelected={(fsm) => fsm.state === "AddNode" && fsm.value.obj === "Mem" && fsm.value.variant === "Read"}
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Mem", variant: "RO", name: name, byte: 1 }}
+      selValue={{ obj: "Mem", variant: "Read", name: name, byte: 1 }}
     />
   );
 };

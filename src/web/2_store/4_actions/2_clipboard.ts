@@ -2,7 +2,7 @@ import { atom, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import { Project } from "~/files";
 import { Position, posAdd, posMid, posRound, posSub } from "~/utils";
 import { ObjKey, PortKey, WireKey, getObjKey, getWireKey, objKeyEq, wireKeyEq } from "~/web/1_type";
-import { boardState, projectState } from "../2_project/0_project";
+import { targetState, projectState } from "../2_project/0_project";
 import { useRevert } from "../2_project/2_revert";
 import { mousePositionState } from "../4_editor/0_fsm";
 import { selectIsEmpty, selectedObjectsResolvedState } from "./0_select";
@@ -71,7 +71,7 @@ export const usePaste = () => {
   const clipboard = useRecoilValue(clipboardState);
   const mousePosition = useRecoilValue(mousePositionState);
   const [project, setProject] = useRecoilState(projectState);
-  const board = useRecoilValue(boardState);
+  const board = useRecoilValue(targetState);
   return () => {
     if (!clipboardEmpty(clipboard)) {
       console.log("Paste", clipboard, mousePosition);

@@ -18,14 +18,14 @@ export const URL_NEXT_MICON = "https://github.com/NextMicon";
 export const URL_PACK_REPO = "https://raw.githubusercontent.com/NextMicon/Registory/main/Package";
 export const URL_BOARD_REPO = "https://raw.githubusercontent.com/NextMicon/Registory/main/Board";
 
-export const SW_INIT = `// main.cpp
-#include "firmware.hpp"
-
-void init(){
-  // Code Here!
-}
-
-void loop(){
-  // Code Here!
-}
-`;
+export const SW_INIT = [
+  "// main.cpp",
+  '#include "firmware.hpp"',
+  "void init(){",
+  "  // Code Here!",
+  "}",
+  "void loop(){",
+  "  // Code Here!",
+  "}",
+  "",
+].join("\n");

@@ -2,7 +2,7 @@ import { DoubleArrow } from "@mui/icons-material";
 import { FC, Fragment } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { dialogState } from "~/web/2_route";
-import { boardState, useColor, useGenerate, useRunMake } from "~/web/2_store";
+import { targetState, useColor, useGenerate, useRunMake } from "~/web/2_store";
 import { Center, Dialog, IconText, Left, css } from "../atom";
 
 // Replace ${ }
@@ -11,7 +11,7 @@ const resolveDependencies = (str: string) => {};
 
 export const BuildDialog: FC<{ zIndex: number }> = ({ zIndex }) => {
   const setDialog = useSetRecoilState(dialogState);
-  const board = useRecoilValue(boardState);
+  const board = useRecoilValue(targetState);
   const color = useColor().dialog;
   const gen = useGenerate();
   const runMake = useRunMake();
