@@ -80,15 +80,9 @@ export const PrimPane: FC = () => {
       <PortOut txt={DOC["Out"]} Icon={KeyboardArrowRight} />
       <PortInOut txt={DOC["InOut"]} Icon={Code} />
       <Irq txt={DOC["Irq"]} Icon={PriorityHigh} />
-      <MemRO txt={DOC["MemRO"]} Icon={Numbers} />
-      <MemRW txt={DOC["MemRW"]} Icon={Numbers} />
-      <Vmod txt={DOC["Vmod"]} Icon={Memory} />
-    </div>
-  );
-};
-
-{
-  /* <Reg txt={DOC["Reg"]} Icon={AccessTime} />
+      <MemRead txt={DOC["MemRO"]} Icon={Numbers} />
+      <MemWrite txt={DOC["MemRW"]} Icon={Numbers} />
+      <Reg txt={DOC["Reg"]} Icon={AccessTime} />
       <Lut txt={DOC["Lut"]} Icon={FormatListNumbered} />
       <Fsm txt={DOC["Fsm"]} Icon={Share} />
       <Slice txt={DOC["Slice"]} Icon={DataArray} />
@@ -98,8 +92,10 @@ export const PrimPane: FC = () => {
       <Vmod txt={DOC["Arith"]} Icon={Add} />
       <Mux txt={DOC["Mux"]} Icon={QuestionMark} />
       <Demux txt={DOC["Demux"]} Icon={QuestionMark} />
-       */
-}
+      <Vmod txt={DOC["Vmod"]} Icon={Memory} />
+    </div>
+  );
+};
 
 const PortIn: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   const [name, setName] = useState("");
@@ -165,8 +161,8 @@ const Irq: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   );
 };
 
-const MemRW: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+const MemWrite: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("reg0");
   return (
     <PrimSelect
       txt={txt}
@@ -180,8 +176,8 @@ const MemRW: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
   );
 };
 
-const MemRO: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+const MemRead: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
+  const [name, setName] = useState("reg0");
   return (
     <PrimSelect
       txt={txt}
@@ -196,7 +192,7 @@ const MemRO: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
 };
 
 const Reg: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("dff0");
   return (
     <PrimSelect
       txt={txt}
@@ -211,7 +207,7 @@ const Reg: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
 };
 
 const Lut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("lut0");
   return (
     <PrimSelect
       txt={txt}
@@ -220,13 +216,13 @@ const Lut: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Lut", name: "lut0", in_bit: 2, out_bit: 1 }}
+      selValue={{ obj: "Lut", name: name, in_bit: 2, out_bit: 1 }}
     />
   );
 };
 
 const Fsm: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("fsm0");
   return (
     <PrimSelect
       txt={txt}
@@ -235,13 +231,13 @@ const Fsm: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Fsm", name: "fsm0", in_bit: 4, state: 4 }}
+      selValue={{ obj: "Fsm", name: name, in_bit: 4, state: 4 }}
     />
   );
 };
 
 const Slice: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("slice0");
   return (
     <PrimSelect
       txt={txt}
@@ -250,13 +246,13 @@ const Slice: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Slice", name: "slice0", range: [0, 0] }}
+      selValue={{ obj: "Slice", name: name, range: [0, 0] }}
     />
   );
 };
 
 const Concat: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("cat0");
   return (
     <PrimSelect
       txt={txt}
@@ -265,13 +261,13 @@ const Concat: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Concat", name: "concat0", in_bits: [1, 1] }}
+      selValue={{ obj: "Concat", name: name, in_bits: [1, 1] }}
     />
   );
 };
 
 const Const: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("const0");
   return (
     <PrimSelect
       txt={txt}
@@ -280,13 +276,13 @@ const Const: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Const", name: "const0", val: 0, bit: 1 }}
+      selValue={{ obj: "Const", name: name, val: 0, bit: 1 }}
     />
   );
 };
 
 const Mux: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("mux0");
   return (
     <PrimSelect
       txt={txt}
@@ -295,13 +291,13 @@ const Mux: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Mux", name: "mux0", sel: 2, bit: 1 }}
+      selValue={{ obj: "Mux", name: name, sel: 2, bit: 1 }}
     />
   );
 };
 
 const Demux: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("demux0");
   return (
     <PrimSelect
       txt={txt}
@@ -310,13 +306,13 @@ const Demux: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       name={name}
       nameSel={{ type: "none" }}
       onNameChange={setName}
-      selValue={{ obj: "Demux", name: "demux0", sel: 2, bit: 1 }}
+      selValue={{ obj: "Demux", name: name, sel: 2, bit: 1 }}
     />
   );
 };
 
 const Vmod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState("vmod0");
   return (
     <PrimSelect
       txt={txt}
@@ -327,7 +323,7 @@ const Vmod: FC<{ txt: string; Icon: SvgIconComponent }> = ({ txt, Icon }) => {
       onNameChange={setName}
       selValue={{
         obj: "Vmod",
-        name: "vmod0",
+        name: name,
         body: "",
         port: [
           { name: "clk", direct: "in", type: "w1", bit: 1, side: "left" },

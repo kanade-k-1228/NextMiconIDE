@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { PackPort } from "~/files";
 import { Concat, Const, Demux, Inst, Irq, Mem, Mux, Obj, ObjViewExt, Port, Reg, Slice, Vmod } from "~/types";
 import { Position, posAdd, posFlip } from "~/utils";
+import { hex } from "~/web/0_common";
 import { ObjResolveExt, useColor } from "~/web/2_store";
 import { useObj } from "~/web/3_facade";
 import { ExclamationIcon, HashIcon, LeftIcon, QuestionIcon, RightIcon } from "~/web/4_view/atom";
@@ -41,18 +42,16 @@ export const ObjView: FC<{ obj: Obj<ObjViewExt & ObjResolveExt> }> = ({ obj }) =
 const MemView: FC<{ obj: Mem<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <PrimView
       pos={obj.pos}
       flip={obj.flip}
       width={obj.width}
-      port_name={false}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={obj.name}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
-      radius={5}
     />
   );
 };
@@ -60,18 +59,16 @@ const MemView: FC<{ obj: Mem<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const IrqView: FC<{ obj: Irq<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <PrimView
       pos={obj.pos}
       flip={obj.flip}
       width={obj.width}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
-      port_name={false}
       name={obj.name}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
-      radius={5}
     />
   );
 };
@@ -79,18 +76,16 @@ const IrqView: FC<{ obj: Irq<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const PortView: FC<{ obj: Port<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <PrimView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={obj.name}
-      port_name={false}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
-      radius={5}
     />
   );
 };
@@ -145,18 +140,16 @@ const RegView: FC<{ obj: Reg<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const ConstView: FC<{ obj: Const<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <ModView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
-      name={`${obj.bit}'b${obj.val.toString()}`}
-      port_name={false}
+      name={`${obj.bit}'h${hex(obj.val, Math.ceil(obj.bit / 4))}`}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
       onMouseDown={onMouseDown}
-      radius={5}
     />
   );
 };
@@ -164,13 +157,12 @@ const ConstView: FC<{ obj: Const<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const InstView: FC<{ obj: Inst<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <ModView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={obj.name}
-      port_name={true}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
@@ -182,13 +174,12 @@ const InstView: FC<{ obj: Inst<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const SliceView: FC<{ obj: Slice<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <ModView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={`${obj.range[0]}:${obj.range[1]}`}
-      port_name={false}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
@@ -200,13 +191,12 @@ const SliceView: FC<{ obj: Slice<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const ConcatView: FC<{ obj: Concat<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <ModView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={""}
-      port_name={false}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
@@ -218,13 +208,12 @@ const ConcatView: FC<{ obj: Concat<ObjViewExt & ObjResolveExt> }> = ({ obj }) =>
 const MuxView: FC<{ obj: Mux<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <ModView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={obj.name}
-      port_name={false}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
@@ -236,13 +225,12 @@ const MuxView: FC<{ obj: Mux<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const DemuxView: FC<{ obj: Demux<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <ModView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={obj.name}
-      port_name={false}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
@@ -254,13 +242,12 @@ const DemuxView: FC<{ obj: Demux<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 const VmodView: FC<{ obj: Vmod<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
   const { onClick, onMouseDown, selected } = useObj(obj);
   return (
-    <ObjAtom
+    <ModView
       pos={obj.pos}
       flip={obj.flip}
       left_ports={obj.left_ports}
       right_ports={obj.right_ports}
       name={obj.name}
-      port_name={true}
       width={obj.width}
       highlight={selected}
       onClick={onClick}
@@ -271,25 +258,17 @@ const VmodView: FC<{ obj: Vmod<ObjViewExt & ObjResolveExt> }> = ({ obj }) => {
 
 // --------------------------------------------------------------------------------
 
-const getTextAlign = (lhs: number, rhs: number, flip: boolean) => {
-  if (lhs === 0 && rhs > 0) return flip ? "right" : "left";
-  if (lhs > 0 && rhs === 0) return flip ? "left" : "right";
-  return "center";
-};
-
-const ObjAtom: FC<{
+const ModView: FC<{
   left_ports: PackPort[];
   right_ports: PackPort[];
   name: string;
   pos: Position;
   flip: boolean;
-  port_name: boolean;
   width: number;
   highlight: boolean;
   onClick: (_: any) => any;
   onMouseDown: (_: any) => any;
-  radius?: number;
-}> = ({ left_ports, right_ports, name, pos, flip, port_name, width, highlight, onClick, onMouseDown, radius = 17 }) => {
+}> = ({ left_ports, right_ports, name, pos, flip, width, highlight, onClick, onMouseDown }) => {
   // Global State
   const color = useColor().editor.hw.graph.obj;
 
@@ -298,6 +277,11 @@ const ObjAtom: FC<{
 
   // Calculate
   const height = Math.max(left_ports.length, right_ports.length) * 40 - 6;
+  const getTextAlign = (lhs: number, rhs: number, flip: boolean) => {
+    if (lhs === 0 && rhs > 0) return flip ? "right" : "left";
+    if (lhs > 0 && rhs === 0) return flip ? "left" : "right";
+    return "center";
+  };
   const text_align = getTextAlign(left_ports.length, right_ports.length, flip);
   const [ox, oy] = pos;
   const _color = highlight || hover ? color.hov : color._;
@@ -319,7 +303,7 @@ const ObjAtom: FC<{
         height={height}
         stroke={_color.border}
         strokeWidth={2}
-        rx={radius}
+        rx={17}
         fill={_color.fill}
       />
       {text_align === "center" && (
@@ -341,7 +325,7 @@ const ObjAtom: FC<{
         <ObjPort
           key={name}
           side="left"
-          name={port_name ? name : ""}
+          name={name}
           direct={direct}
           pos={posAdd(pos, [-width / 2 + 17, (i - (arr.length - 1) / 2) * 40])}
           hov={hover}
@@ -352,7 +336,96 @@ const ObjAtom: FC<{
         <ObjPort
           key={name}
           side="right"
-          name={port_name ? name : ""}
+          name={name}
+          direct={direct}
+          pos={posAdd(pos, [width / 2 - 17, (i - (arr.length - 1) / 2) * 40])}
+          hov={hover}
+          icon={icon}
+        />
+      ))}
+    </g>
+  );
+};
+
+const PrimView: FC<{
+  left_ports: PackPort[];
+  right_ports: PackPort[];
+  name: string;
+  pos: Position;
+  flip: boolean;
+  width: number;
+  highlight: boolean;
+  onClick: (_: any) => any;
+  onMouseDown: (_: any) => any;
+}> = ({ left_ports, right_ports, name, pos, flip, width, highlight, onClick, onMouseDown }) => {
+  // Global State
+  const color = useColor().editor.hw.graph.obj;
+
+  // Local State
+  const [hover, setHover] = useState(false);
+
+  // Calculate
+  const height = Math.max(left_ports.length, right_ports.length) * 40 - 6;
+  const getTextAlign = (lhs: number, rhs: number, flip: boolean) => {
+    if (lhs === 0 && rhs > 0) return flip ? "right" : "left";
+    if (lhs > 0 && rhs === 0) return flip ? "left" : "right";
+    return "center";
+  };
+  const text_align = getTextAlign(left_ports.length, right_ports.length, !flip);
+  const [ox, oy] = pos;
+  const _color = highlight || hover ? color.hov : color._;
+  const lp = flip ? right_ports : left_ports;
+  const rp = flip ? left_ports : right_ports;
+
+  return (
+    <g
+      onMouseOver={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+      style={{ cursor: "pointer" }}
+    >
+      <rect
+        x={ox - width / 2}
+        y={oy - height / 2}
+        width={width}
+        height={height}
+        stroke={_color.border}
+        strokeWidth={2}
+        rx={5}
+        fill={_color.fill}
+      />
+      {text_align === "center" && (
+        <text x={ox} y={oy} fontSize={25} textAnchor="middle" alignmentBaseline="middle">
+          {name}
+        </text>
+      )}
+      {text_align === "right" && (
+        <text x={ox + width / 2 - 40} y={oy} fontSize={25} textAnchor="end" alignmentBaseline="middle">
+          {name}
+        </text>
+      )}
+      {text_align === "left" && (
+        <text x={ox - width / 2 + 40} y={oy} fontSize={25} textAnchor="start" alignmentBaseline="middle">
+          {name}
+        </text>
+      )}
+      {lp.map(({ name, direct, icon }, i, arr) => (
+        <ObjPort
+          key={name}
+          side="left"
+          name={""}
+          direct={direct}
+          pos={posAdd(pos, [-width / 2 + 17, (i - (arr.length - 1) / 2) * 40])}
+          hov={hover}
+          icon={icon}
+        />
+      ))}
+      {rp.map(({ name, direct, icon }, i, arr) => (
+        <ObjPort
+          key={name}
+          side="right"
+          name={""}
           direct={direct}
           pos={posAdd(pos, [width / 2 - 17, (i - (arr.length - 1) / 2) * 40])}
           hov={hover}

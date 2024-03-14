@@ -15,6 +15,8 @@ export * from "./4_actions/2_clipboard";
 export * from "./4_actions/3_rename";
 export * from "./4_actions/4_move";
 export * from "./4_actions/5_flip";
+export * from "./4_actions/6_param";
+export * from "./4_actions/7_sort";
 export * from "./4_actions/9_delete";
 export * from "./4_editor/0_fsm";
 export * from "./4_editor/0_pane";
