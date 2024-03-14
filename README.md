@@ -31,9 +31,17 @@ To use NextMiconIDE, the following tools are required:
 
 ### Ubuntu
 
+```
+curl -fsSL https://raw.githubusercontent.com/NextMicon/NextMiconIDE/main/script/install.sh | sh
+```
+
 ## License
 
 This project is released under the ~~~.
+
+## Contribution
+
+Contributions are welcome! Please submit feedback and improvement suggestions through Issues and Pull Requests. Some remaining tasks are on [TODO](doc/TODO.md).
 
 ## Acknowledgement
 
