@@ -32,7 +32,7 @@ To use NextMiconIDE, the following tools are required:
 ### Ubuntu
 
 ```
-curl -fsSL https://raw.githubusercontent.com/NextMicon/NextMiconIDE/main/script/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/NextMicon/NextMiconIDE/main/script/install_ubuntu_x86.sh | sh
 ```
 
 ## License
