@@ -6,9 +6,14 @@ export const REGISTORY_FILE = "registory.nm.yaml";
 export const PACK_FILE = "package.nm.yaml";
 export const PROJ_FILE = "project.nm.yaml";
 export const BOARD_FILE = "board.nm.yaml";
-export const SW_DIR = "software";
+
+export const SW_DIR = "sw";
 export const SW_FILE = "main.cpp";
+
+export const BUILD_DIR = "build";
+export const MICON_DIR = "micon";
 export const MK_FILE = "Makefile";
+export const GITIGNORE_FILE = ".gitignore";
 
 export const WIRE_WIDTH = 3;
 
@@ -20,7 +25,7 @@ export const URL_BOARD_REPO = "https://raw.githubusercontent.com/NextMicon/Regis
 
 export const SW_INIT = [
   "// main.cpp",
-  '#include "firmware.hpp"',
+  '#include "fw.hpp"',
   "void init(){",
   "  // Code Here!",
   "}",

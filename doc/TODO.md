@@ -5,6 +5,7 @@
 - GitHub Actions build script
 - Install script
 - Use GraphQL for IPC
+- Online Editor
 
 ## Micon Editor
 
